@@ -106,14 +106,14 @@ const LeaderboardRanked = () => {
   }
 
   /**
-   * Determine if a player is qualified for LCQ (season peak elo > 1500)
+   * Determine if a player is qualified for LCQ (season peak elo > 1499)
    * 
    * @param {number} [seasonPeakElo] seasonResult.highest from the per-runner mcsrranked API call
    * @param {object} player The leaderboard player entry (backend data), used as a fallback
    * @returns {boolean} whether the player is LCQ qualified
    */
   const getLcqQualified = (seasonPeakElo, player) => {
-    return Number(seasonPeakElo ?? player.peakElo ?? 0) > 1500
+    return Number(seasonPeakElo ?? player.peakElo ?? 0) > 1499
   }
 
   /**
