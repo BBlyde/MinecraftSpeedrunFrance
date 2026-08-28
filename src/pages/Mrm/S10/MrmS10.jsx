@@ -55,7 +55,7 @@ function MrmS10() {
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data)
-      setMrmData(data)
+      if (!data?.bracket?.round16) setMrmData(data)
     }
 
     ws.onerror = (err) => console.error('WebSocket erreur MRM', err)

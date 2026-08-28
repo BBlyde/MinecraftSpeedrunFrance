@@ -44,7 +44,8 @@ function App() {
           <Route path="/prediction/mrm/:discordId" element={<MrmPrediction />} />
           <Route path="/prediction/mrm" element={<MrmPrediction />} />
           <Route path="/tournament" element={<Tournament />} />
-          <Route path="/admin" element={<Admin />} />
+          <Route path="/admin" element={<Navigate to="/admin/mrm" replace />} />
+          <Route path="/admin/:template" element={<Admin />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
