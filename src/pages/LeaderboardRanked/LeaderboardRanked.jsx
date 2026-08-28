@@ -252,30 +252,37 @@ const LeaderboardRanked = () => {
     <div className="leaderboard-ranked">
       <div className="leaderboard-container">
         <div className="leaderboard-header">
-          <h1><span className="ranked-title">CLASSEMENT RANKED </span><span className="ranked-season">S{season}</span></h1>
-          <span className="info">Détermine la qualification au <Link to="/mrm" className='info-link'>MSF Ranked Masters</Link></span>
+          <h1 className="ranked-title-row">
+            <button
+              className="season-arrow"
+              onClick={() => season > 1 && navigate(`/ranked?season=${season - 1}`)}
+              disabled={season <= 1}
+              aria-label="Saison précédente"
+            >&lt;</button>
+            <span className="ranked-title">CLASSEMENT RANKED </span><span className="ranked-season">S{season}</span>
+            <button
+              className="season-arrow"
+              onClick={() => season < 11 && navigate(`/ranked?season=${season + 1}`)}
+              disabled={season >= 11}
+              aria-label="Saison suivante"
+            >&gt;</button>
+          </h1>
+          <span className="info">
+            {season === 10 || season === 11
+              ? <>Détermine la qualification au <Link to={`/mrm?season=${season}`} className='info-link'>MSF Ranked Masters</Link></>
+              : <>Mode de jeu <a href="https://mcsrranked.com/stats" target="_blank" rel="noopener noreferrer" className='info-link'>MCSR Ranked</a></>
+              }
+          </span>
         </div>
 
         <div className="section-divider" />
 
         <div className="season-nav">
-          <button
-            className="season-arrow"
-            onClick={() => season > 1 && navigate(`/ranked?season=${season - 1}`)}
-            disabled={season <= 1}
-            aria-label="Saison précédente"
-          >&lt;</button>
           <div className="countdown">
             <p className="countdown-label">FIN DE SAISON</p>
             <div className="countdown-timer">{loading ? '...' : timeLeft}</div>
             <p className="countdown-date">{loading ? '...' : formatEndDate(seasonEndDate)}</p>
           </div>
-          <button
-            className="season-arrow"
-            onClick={() => season < 11 && navigate(`/ranked?season=${season + 1}`)}
-            disabled={season >= 11}
-            aria-label="Saison suivante"
-          >&gt;</button>
         </div>
 
         {loading && <div className="loading">Chargement du classement...</div>}

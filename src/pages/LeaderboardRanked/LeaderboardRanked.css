@@ -111,6 +111,12 @@
     margin: 0;
 }
 
+.leaderboard-ranked .ranked-title-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
 .leaderboard-ranked .ranked-title {
     background: linear-gradient(90deg,
             #86CE34 0%,
