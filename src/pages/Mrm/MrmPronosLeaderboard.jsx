@@ -2,8 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { discordAvatarUrl, discordDisplayName } from '../../utils/discordUser'
 import { predictionApiUrl } from '../../utils/predictionApi'
-
-const mrmPredictionLeaderboardUrl = predictionApiUrl('/prediction/mrm/leaderboard')
+import { predictionPagePath } from '../MrmPrediction/predictionSeason'
 
 /** Classement compétition : 1, 2, 2, 4… (égalité = même rang, on saute les places suivantes). */
 function competitionRanks(rows) {
@@ -17,14 +16,15 @@ function competitionRanks(rows) {
 }
 
 /**
- * @param {{ highlightUserId?: string | null }} props
+ * @param {{ highlightUserId?: string | null, event?: string, season?: number }} props
  */
-export default function MrmPronosLeaderboard({ highlightUserId = null }) {
+export default function MrmPronosLeaderboard({ highlightUserId = null, event = 'mrm', season = 10 }) {
   const location = useLocation()
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const ranks = useMemo(() => competitionRanks(rows), [rows])
+  const leaderboardUrl = predictionApiUrl(`/prediction/${event}/leaderboard`)
 
   useEffect(() => {
     let cancelled = false
@@ -32,7 +32,7 @@ export default function MrmPronosLeaderboard({ highlightUserId = null }) {
     setError(false)
     ;(async () => {
       try {
-        const res = await fetch(mrmPredictionLeaderboardUrl)
+        const res = await fetch(leaderboardUrl)
         const data = res.ok ? await res.json() : { leaderboard: [] }
         const list = Array.isArray(data.leaderboard) ? data.leaderboard : []
         if (!cancelled) {
@@ -51,7 +51,7 @@ export default function MrmPronosLeaderboard({ highlightUserId = null }) {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [leaderboardUrl])
 
   return (
     <aside className="mrm-prediction-leaderboard" aria-label="Classement des pronostiques">
@@ -74,8 +74,8 @@ export default function MrmPronosLeaderboard({ highlightUserId = null }) {
                 globalName: row.globalName,
               })
               const name = label || row.username || '—'
-              const profilePath = `/prediction/mrm/${encodeURIComponent(row.discordId)}`
-              const isActive = location.pathname === profilePath
+              const profilePath = predictionPagePath(season, row.discordId)
+              const isActive = location.pathname === `/prediction/mrm/${encodeURIComponent(row.discordId)}`
               return (
                 <li key={`${row.discordId}-${index}`}>
                   <Link
