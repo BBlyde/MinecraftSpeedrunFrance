@@ -489,6 +489,10 @@
     background: #111;
 }
 
+.group-table th.col-rank {
+    background: #111;
+}
+
 .group-table td.col-player {
     box-shadow: 6px 0 8px -8px rgba(0, 0, 0, 0.9);
 }
@@ -513,6 +517,12 @@
 .group-table tbody tr.row-qualify td.col-rank,
 .group-table tbody tr.row-qualify td.col-pts {
     color: #86CE34;
+}
+
+.group-table tbody tr.row-qualify td.col-rank,
+.group-table tbody tr.row-qualify td.col-player {
+    background-image: linear-gradient(#ffffff18, #ffffff18);
+    background-color: #161b22;
 }
 
 .rules-panel {
