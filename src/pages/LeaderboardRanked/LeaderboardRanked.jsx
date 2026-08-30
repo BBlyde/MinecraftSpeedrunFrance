@@ -64,7 +64,7 @@ const LeaderboardRanked = () => {
 
       // Only compute LCQ qualification for the current season, waiting for every
       // per-runner check before the leaderboard is shown
-      if (Number(season) === CURRENT_SEASON) {
+      if (Number(season) === CURRENT_SEASON - 1) {
         const topLcqPlayers = nextPlayers.filter((player) => Number(player.placement) <= TOP_LCQ_PLAYERS_COUNT)
         const lcqChecks = await Promise.allSettled(
           topLcqPlayers.map(async (player) => {
@@ -369,7 +369,7 @@ const LeaderboardRanked = () => {
                             </div>
                           </td>
                         </tr>
-                        {season === CURRENT_SEASON && player.placement === 12 && (
+                        {season === CURRENT_SEASON - 1 && player.placement === 12 && (
                           <tr className="qualification-threshold">
                             <td colSpan="3">
                               <div className="threshold-line">
