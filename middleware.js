@@ -7,7 +7,13 @@ export const config = { matcher: '/api/:path*' }
 
 export default async function middleware(request) {
   const url = new URL(request.url)
-  if (url.pathname.startsWith('/api/auth') || NODE_ONLY.has(url.pathname)) {
+  if (
+    url.pathname.startsWith('/api/auth') ||
+    url.pathname.startsWith('/api/lcq-mrm') ||
+    url.pathname.startsWith('/api/tournament') ||
+    url.pathname.startsWith('/api/mcsr') ||
+    NODE_ONLY.has(url.pathname)
+  ) {
     return next()
   }
 

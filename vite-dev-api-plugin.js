@@ -6,6 +6,7 @@ import { proxyBrowserApiToBackendAdapter } from './lib/backendApiProxy.js'
 import { denyUnlessAdmin, tournamentWriteRequiresAdmin } from './lib/adminAuth.js'
 import predictionsMrm from './api/predictions/mrm.js'
 import draftoutStats from './api/draftout/stats.js'
+import mcsrLiveProxy from './lib/mcsrLiveProxy.js'
 
 function vercelResponseAdapter(nodeRes) {
   let statusCode = 200
@@ -90,9 +91,17 @@ export function devApiPlugin() {
               await draftoutStats(req, vres)
               return
             }
+            if (pathname.startsWith('/api/mcsr/')) {
+              req.query = {
+                ...query,
+                path: pathname.slice('/api/mcsr/'.length).split('/').filter(Boolean),
+              }
+              await mcsrLiveProxy(req, vres)
+              return
+            }
             const pathWithQuery = pathname + (url.search || '')
             if (
-              pathname.startsWith('/api/tournament') &&
+              (pathname.startsWith('/api/tournament') || pathname.startsWith('/api/lcq-mrm')) &&
               tournamentWriteRequiresAdmin(req.method) &&
               denyUnlessAdmin(req, vres)
             ) {

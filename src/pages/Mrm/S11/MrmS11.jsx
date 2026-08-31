@@ -4,13 +4,17 @@ import { Link } from 'react-router-dom'
 
 const BRACKET_PLACEHOLDER_UUID = '0385'
 
-function BracketSlot() {
+function BracketSlot({ player }) {
+  const uuid = player?.id || BRACKET_PLACEHOLDER_UUID
+  const name = player?.name || ''
+  const score = player?.score ?? '0'
   return (
     <div className="player">
       <div className="player-info">
-        <img src={`https://mc-heads.net/avatar/${BRACKET_PLACEHOLDER_UUID}/48`} className="player-head" width={24} height={24} />
-        <span className='player-name'>TBD</span>
+        <img src={`https://mc-heads.net/avatar/${uuid}/48`} className="player-head" width={24} height={24} />
+        <span className='player-name'>{name ? name : 'TBD'}</span>
       </div>
+      <span className="player-score">{score}</span>
     </div>
   )
 }
@@ -19,10 +23,10 @@ function MrmS11() {
   const [mrmData, setMrmData] = useState(null)
 
   useEffect(() => {
-    fetch('/api/tournament/mrm')
+    fetch('/api/tournament/mrm11')
       .then((res) => res.json())
       .then((data) => setMrmData(data))
-      .catch((err) => console.error('Erreur chargement données MRM', err))
+      .catch((err) => console.error('Erreur chargement données MRM S11', err))
 
     const ws = new WebSocket('wss://back.mcsr-game.com/ws/tournament')
 
@@ -30,10 +34,10 @@ function MrmS11() {
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data)
-      setMrmData(data)
+      if (data?.bracket?.round16) setMrmData(data)
     }
 
-    ws.onerror = (err) => console.error('WebSocket erreur MRM', err)
+    ws.onerror = (err) => console.error('WebSocket erreur MRM S11', err)
 
     return () => {
       ws.close()
@@ -43,7 +47,10 @@ function MrmS11() {
   const bracket = mrmData?.bracket
   const round16 = bracket?.round16 ?? []
   const quarterFinal = bracket?.quarter ?? []
-  const semiFinal = bracket?.semi ?? []
+  const semiFinal = [
+    [bracket?.semi?.[0], bracket?.semi?.[1]],
+    [bracket?.semi?.[2], bracket?.semi?.[3]],
+  ]
   return (
     <div className="mrm-s11 mrm-prediction-content-wrap">
       <div className="container">
