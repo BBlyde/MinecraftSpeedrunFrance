@@ -5,20 +5,27 @@ const NODE_ONLY = new Set(['/api/predictions/mrm', '/api/prediction/mrm', '/api/
 
 export const config = { matcher: '/api/:path*' }
 
+function isWriteMethod(method) {
+  const m = (method || 'GET').toUpperCase()
+  return m !== 'GET' && m !== 'HEAD' && m !== 'OPTIONS'
+}
+
 export default async function middleware(request) {
   const url = new URL(request.url)
+  const method = request.method
+  const tournamentWrite =
+    url.pathname.startsWith('/api/tournament') && isWriteMethod(method)
   if (
     url.pathname.startsWith('/api/auth') ||
     url.pathname.startsWith('/api/lcq-mrm') ||
-    url.pathname.startsWith('/api/tournament') ||
     url.pathname.startsWith('/api/mcsr') ||
+    tournamentWrite ||
     NODE_ONLY.has(url.pathname)
   ) {
     return next()
   }
 
   const targetUrl = backendTargetUrl(url.pathname + url.search)
-  const method = request.method
   const headers = new Headers()
   for (const k of ['accept', 'accept-language', 'content-type', 'authorization', 'cookie', 'x-requested-with']) {
     const v = request.headers.get(k)
