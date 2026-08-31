@@ -18,6 +18,29 @@
     min-width: 0;
 }
 
+@media (min-width: 991px) {
+    .mrm-container.mrm-prediction .container-first {
+        justify-content: center;
+        gap: 0;
+        align-items: center;
+    }
+
+    .mrm-container.mrm-prediction .mrm-playoffs {
+        width: auto;
+        flex: 0 0 auto;
+    }
+
+    .mrm-container.mrm-prediction .mrm-podium {
+        width: auto;
+        flex: 0 0 auto;
+    }
+
+    .mrm-container.mrm-prediction .podium-title,
+    .mrm-container.mrm-prediction .podium-wrapper {
+        margin-left: 200px;
+    }
+}
+
 .mrm-prediction-auth-banner {
     display: flex;
     flex-wrap: wrap;
