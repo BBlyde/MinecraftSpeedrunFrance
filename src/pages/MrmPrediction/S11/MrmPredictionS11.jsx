@@ -7,6 +7,7 @@ import MrmPronosLeaderboard from '../../Mrm/MrmPronosLeaderboard'
 import { discordAvatarUrl, discordDisplayName } from '../../../utils/discordUser'
 import { predictionApiUrl } from '../../../utils/predictionApi'
 import { predictionEventForSeason, predictionPagePath } from '../predictionSeason'
+import PredictionAuthBanner from '../PredictionAuthBanner'
 import {
   DEFAULT_FINISHED_STATE,
   DEFAULT_HEAD,
@@ -33,7 +34,7 @@ import {
   winnerPidFromBoNScores,
 } from '../predictionUi'
 
-const LCQ_SIZE = 8
+const LCQ_SIZE = 16
 const LCQ_SEED_COUNT = 8
 const LCQ_QUALIFY = 4
 const R16_COUNT = 8
@@ -53,6 +54,15 @@ function r16Match(bracket, index) {
 function qfMatch(bracket, index) {
   const match = bracket?.quarter?.[index]
   return Array.isArray(match) ? match : [null, null]
+}
+
+function sfMatch(bracket, index) {
+  const semi = bracket?.semi
+  if (Array.isArray(semi?.[0])) {
+    const match = semi?.[index]
+    return Array.isArray(match) ? match : [null, null]
+  }
+  return [semi?.[index * 2] ?? null, semi?.[index * 2 + 1] ?? null]
 }
 
 function ingestSlot(map, slot, fallbackPid) {
@@ -181,11 +191,12 @@ function MrmPredictionS11({ season = 11 }) {
       ingestSlot(m, match[0], `qf:${i}:0`)
       ingestSlot(m, match[1], `qf:${i}:1`)
     }
-    const semi = bracket?.semi ?? []
-    ingestSlot(m, semi[0], 'sf:0:0')
-    ingestSlot(m, semi[1], 'sf:0:1')
-    ingestSlot(m, semi[2], 'sf:1:0')
-    ingestSlot(m, semi[3], 'sf:1:1')
+    const sf1 = sfMatch(bracket, 0)
+    const sf2 = sfMatch(bracket, 1)
+    ingestSlot(m, sf1[0], 'sf:0:0')
+    ingestSlot(m, sf1[1], 'sf:0:1')
+    ingestSlot(m, sf2[0], 'sf:1:0')
+    ingestSlot(m, sf2[1], 'sf:1:1')
     ingestSlot(m, bracket?.final?.[0], 'final:0')
     ingestSlot(m, bracket?.final?.[1], 'final:1')
     ingestSlot(m, bracket?.lower?.[0], 'third:0')
@@ -235,7 +246,7 @@ function MrmPredictionS11({ season = 11 }) {
   const semi1Pair = useMemo(
     () =>
       pairFromSlots(
-        [tournamentBracket?.semi?.[0], tournamentBracket?.semi?.[1]],
+        sfMatch(tournamentBracket, 0),
         showTreeNames ? qfWinners[0] : null,
         showTreeNames ? qfWinners[1] : null,
         playerMap,
@@ -245,7 +256,7 @@ function MrmPredictionS11({ season = 11 }) {
   const semi2Pair = useMemo(
     () =>
       pairFromSlots(
-        [tournamentBracket?.semi?.[2], tournamentBracket?.semi?.[3]],
+        sfMatch(tournamentBracket, 1),
         showTreeNames ? qfWinners[2] : null,
         showTreeNames ? qfWinners[3] : null,
         playerMap,
@@ -319,7 +330,7 @@ function MrmPredictionS11({ season = 11 }) {
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (cancelled) return
-        const fromApi = normalizeGroupFromApi(data?.group1, LCQ_SEED_COUNT)
+        const fromApi = normalizeGroupFromApi(data?.lcq ?? data?.group1, LCQ_SEED_COUNT)
         setLcq(fromApi.length > 0 ? fromApi : placeholderPlayers(LCQ_SIZE, LCQ_SEED_COUNT))
         if (data?.bracket && typeof data.bracket === 'object') {
           setTournamentBracket(data.bracket)
@@ -682,7 +693,7 @@ function MrmPredictionS11({ season = 11 }) {
         officialInfo?.semi1Winner,
         [semi1Pair.pid0, semi1Pair.pid1].filter(Boolean),
         playerMap,
-        [tournamentBracket?.semi?.[0], tournamentBracket?.semi?.[1]],
+        sfMatch(tournamentBracket, 0),
         BO5,
       ),
     [officialInfo, semi1Pair, playerMap, tournamentBracket],
@@ -693,7 +704,7 @@ function MrmPredictionS11({ season = 11 }) {
         officialInfo?.semi2Winner,
         [semi2Pair.pid0, semi2Pair.pid1].filter(Boolean),
         playerMap,
-        [tournamentBracket?.semi?.[2], tournamentBracket?.semi?.[3]],
+        sfMatch(tournamentBracket, 1),
         BO5,
       ),
     [officialInfo, semi2Pair, playerMap, tournamentBracket],
@@ -775,14 +786,7 @@ function MrmPredictionS11({ season = 11 }) {
         </div>
       ) : null}
 
-      {authChecked && !discordUser && !readOnly ? (
-        <div className="mrm-prediction-auth-banner" role="status">
-          <span>Connecte-toi pour enregistrer et modifier tes prédictions</span>
-          <a className="mrm-prediction-auth-link" href="/api/auth/discord">
-            Discord
-          </a>
-        </div>
-      ) : null}
+      <PredictionAuthBanner visible={authChecked && !discordUser && !readOnly} />
       {isGlobalLocked ? (
         <div className="mrm-prediction-auth-banner mrm-prediction-auth-banner--locks" role="status">
           <span>

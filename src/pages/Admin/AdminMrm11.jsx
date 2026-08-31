@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import AdminPredictionRecompute, { S11_RECOMPUTE_PHASES } from './AdminPredictionRecompute'
 
 export const MRM11_EVENT_ID = 'mrm11'
+const LCQ_SIZE = 16
 const POLL_MS = 2500
 const IN_MATCH_STATUSES = new Set(['counting', 'generate', 'ready', 'running'])
 
@@ -19,8 +21,8 @@ const MATCH_DEFS = [
     matchIndex: i,
     baseLabel: `Quart ${i + 1}`,
   })),
-  { id: 'semi1', kind: 'flat', round: 'semi', slots: [0, 1], baseLabel: 'Demi 1' },
-  { id: 'semi2', kind: 'flat', round: 'semi', slots: [2, 3], baseLabel: 'Demi 2' },
+  { id: 'semi1', kind: 'nested', round: 'semi', matchIndex: 0, baseLabel: 'Demi 1' },
+  { id: 'semi2', kind: 'nested', round: 'semi', matchIndex: 1, baseLabel: 'Demi 2' },
   { id: 'final', kind: 'flat', round: 'final', slots: [0, 1], baseLabel: 'Finale' },
   { id: 'lower', kind: 'flat', round: 'lower', slots: [0, 1], baseLabel: 'Petite finale' },
 ]
@@ -98,11 +100,20 @@ function padMatches(list, count) {
   return out
 }
 
+function nestedMatches(semi, matchCount = 2) {
+  if (Array.isArray(semi?.[0])) return padMatches(semi, matchCount)
+  const matches = []
+  for (let i = 0; i < matchCount; i += 1) {
+    matches.push([semi?.[i * 2], semi?.[i * 2 + 1]])
+  }
+  return padMatches(matches, matchCount)
+}
+
 function normalizeBracket(bracket) {
   return {
     round16: padMatches(bracket?.round16, 8),
     quarter: padMatches(bracket?.quarter, 4),
-    semi: padSlots(bracket?.semi, 4),
+    semi: nestedMatches(bracket?.semi, 2),
     lower: padSlots(bracket?.lower, 2),
     final: padSlots(bracket?.final, 2),
   }
@@ -157,7 +168,7 @@ async function applyWinToTournament(matchDef, winner) {
   const bracket = normalizeBracket(body?.bracket)
 
   if (matchDef.kind === 'nested') {
-    const size = matchDef.round === 'round16' ? 8 : 4
+    const size = matchDef.round === 'round16' ? 8 : matchDef.round === 'quarter' ? 4 : 2
     const round = padMatches(bracket[matchDef.round], size)
     const pair = [...round[matchDef.matchIndex]]
     const slotIndex = pair.findIndex((slot) => playerMatches(slot, winner))
@@ -229,11 +240,42 @@ function buildS11BracketPayload(formDataObj, current) {
   const bracket = normalizeBracket(current)
   for (let i = 0; i < 8; i += 1) applyPair(bracket.round16[i], formDataObj, `round16-${i}`)
   for (let i = 0; i < 4; i += 1) applyPair(bracket.quarter[i], formDataObj, `quarter-${i}`)
-  applyPair([bracket.semi[0], bracket.semi[1]], formDataObj, 'semi-0')
-  applyPair([bracket.semi[2], bracket.semi[3]], formDataObj, 'semi-1')
+  applyPair(bracket.semi[0], formDataObj, 'semi-0')
+  applyPair(bracket.semi[1], formDataObj, 'semi-1')
   applyPair(bracket.final, formDataObj, 'final')
   applyPair(bracket.lower, formDataObj, 'lower')
   return bracket
+}
+
+function buildLcqPayload(formDataObj) {
+  return Array.from({ length: LCQ_SIZE }, (_, i) => ({
+    name: String(formDataObj[`lcq-${i}-name`] ?? '').trim(),
+    uuid: String(formDataObj[`lcq-${i}-uuid`] ?? '').trim(),
+  }))
+}
+
+function LcqPlayerRow({ index, player }) {
+  return (
+    <div className="admin-match">
+      <span className="match-label">#{index + 1}</span>
+      <div className="player-name">
+        <input
+          name={`lcq-${index}-name`}
+          className="player-field"
+          placeholder="Name"
+          defaultValue={player?.name ?? ''}
+        />
+      </div>
+      <div className="player-id">
+        <input
+          name={`lcq-${index}-uuid`}
+          className="player-field"
+          placeholder="UUID"
+          defaultValue={player?.uuid ?? ''}
+        />
+      </div>
+    </div>
+  )
 }
 
 function Mrm11Tracker({ tournament, onApplied }) {
@@ -507,6 +549,23 @@ function AdminMrm11() {
     setRefreshToken((value) => value + 1)
   }, [])
 
+  const handleLcqSubmit = async (event) => {
+    event.preventDefault()
+    if (!window.confirm('Confirmer la mise à jour du LCQ S11 ?')) return
+    const formDataObj = Object.fromEntries(new FormData(event.currentTarget).entries())
+    const payload = buildLcqPayload(formDataObj)
+    const posted = await requestJson(`/api/tournament/${MRM11_EVENT_ID}/lcq`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+    if (!posted.ok) {
+      console.error('Erreur envoi LCQ S11', posted.body)
+      return
+    }
+    setRefreshToken((value) => value + 1)
+  }
+
   const handleBracketSubmit = async (event) => {
     event.preventDefault()
     if (!window.confirm('Confirmer la mise à jour du bracket S11 ?')) return
@@ -533,7 +592,21 @@ function AdminMrm11() {
       {loading ? (
         <span className="info">Chargement du bracket...</span>
       ) : (
-        <div className="bracket-section">
+        <>
+          <div className="group-section">
+            <div className="group-header">
+              <span>LCQ</span>
+              <span>Nom</span>
+              <span>Id</span>
+            </div>
+            <form onSubmit={handleLcqSubmit} className="form-lcq-roster" key={`${formKey}-lcq`}>
+              {Array.from({ length: LCQ_SIZE }, (_, i) => (
+                <LcqPlayerRow key={i} index={i} player={tournament?.lcq?.[i]} />
+              ))}
+              <button type="submit">Valider le LCQ</button>
+            </form>
+          </div>
+          <div className="bracket-section">
           <form onSubmit={handleBracketSubmit} className="form-bracket" key={formKey}>
             {Array.from({ length: 8 }, (_, i) => (
               <MatchAdminRow
@@ -553,14 +626,16 @@ function AdminMrm11() {
                 maxScore={2}
               />
             ))}
-            <MatchAdminRow label="Demi 1" prefix="semi-0" slots={[bracket.semi[0], bracket.semi[1]]} maxScore={3} />
-            <MatchAdminRow label="Demi 2" prefix="semi-1" slots={[bracket.semi[2], bracket.semi[3]]} maxScore={3} />
+            <MatchAdminRow label="Demi 1" prefix="semi-0" slots={bracket.semi[0]} maxScore={3} />
+            <MatchAdminRow label="Demi 2" prefix="semi-1" slots={bracket.semi[1]} maxScore={3} />
             <MatchAdminRow label="Finale" prefix="final" slots={bracket.final} maxScore={3} />
             <MatchAdminRow label="Petite finale" prefix="lower" slots={bracket.lower} maxScore={3} />
             <button type="submit">Valider</button>
           </form>
         </div>
+        </>
       )}
+      <AdminPredictionRecompute event={MRM11_EVENT_ID} phases={S11_RECOMPUTE_PHASES} />
     </>
   )
 }

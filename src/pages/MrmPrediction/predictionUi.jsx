@@ -196,6 +196,10 @@ export function normalizeGroupPlayer(row, seedCount = 6) {
   for (let i = 1; i <= seedCount; i += 1) {
     player[`s${i}`] = num(`s${i}`)
   }
+  if (!player.total) {
+    player.total = Array.from({ length: seedCount }, (_, i) => player[`s${i + 1}`] ?? 0)
+      .reduce((sum, value) => sum + value, 0)
+  }
   return player
 }
 
