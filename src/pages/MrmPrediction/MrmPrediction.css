@@ -672,8 +672,8 @@
     border-bottom-color: #2a2a2a !important;
 }
 
-.mrm-bracket-scored-row.mrm-match-winner .mrm-bracket-name,
-.mrm-bracket-scored-row.mrm-match-winner .mrm-bracket-score-area {
+.mrm-bracket-scored-row.mrm-match-winner .player-name,
+.mrm-bracket-scored-row.mrm-match-winner .player-score {
     color: rgb(255, 202, 40);
     font-weight: 700;
 }
@@ -690,8 +690,8 @@
     opacity: 1;
 }
 
-.match .mrm-bracket-scored-row.mrm-match-result-correct .mrm-bracket-name,
-.match .mrm-bracket-scored-row.mrm-match-result-correct .mrm-bracket-score-area {
+.match .mrm-bracket-scored-row.mrm-match-result-correct .player-name,
+.match .mrm-bracket-scored-row.mrm-match-result-correct .player-score {
     color: #d4f5a0;
     font-weight: 700;
 }
@@ -713,21 +713,6 @@
     background: rgba(110, 110, 110, 0.24) !important;
     color: #e3e3e3;
     opacity: 1;
-}
-
-.mrm-bracket-name {
-    font-size: 0.8rem;
-    font-weight: 600;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    min-width: 0;
-}
-
-@media (max-width: 768px) {
-    .mrm-bracket-name {
-        font-size: 0.72rem;
-    }
 }
 
 @media (max-width: 990px) {

@@ -594,11 +594,12 @@ function BracketScoredPlayerRow({
   const showPickedWinnerHighlight =
     !isTbd && isWinner && (!resultsRevealed || comparisonClass === 'mrm-match-result-correct')
   const canPick = pickable && !isTbd
-  const rowCls = ['mrm-bracket-scored-row']
+  const rowCls = ['player', 'mrm-bracket-scored-row']
   if (comparisonClass) rowCls.push(comparisonClass)
   if (showPickedWinnerHighlight) rowCls.push('mrm-match-winner')
   else if (isLoser) rowCls.push('mrm-match-loser')
   if (!canPick) rowCls.push('mrm-bracket-scored-row--disabled')
+  if (isTbd) rowCls.push('mrm-bracket-tbd')
 
   const handleRowClick = () => {
     if (!canPick || !Array.isArray(matchScores) || matchScores.length !== 2) return
@@ -623,13 +624,13 @@ function BracketScoredPlayerRow({
         <img
           src={isTbd ? DEFAULT_HEAD : mcHeadUrl(player.uuid)}
           alt=""
-          className="player-head mrm-bracket-head"
+          className="player-head"
           width={24}
           height={24}
         />
-        <span className="mrm-bracket-name player-name">{displayName}</span>
+        <span className="player-name">{displayName}</span>
       </span>
-      <span className="mrm-bracket-score-area player-score">{scoreValue}</span>
+      <span className="player-score">{scoreValue}</span>
     </button>
   )
 }

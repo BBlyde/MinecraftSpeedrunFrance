@@ -762,67 +762,57 @@
     }
 }
 
-.match button.mrm-bracket-scored-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.3rem;
+.match button.player {
     width: 100%;
     max-width: none;
-    height: 40px;
-    padding: 0 1rem;
-    box-sizing: border-box;
     border: none;
     border-bottom: 1px solid #2a2a2a;
     margin: 0;
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: #d0d0d0;
     background: transparent;
     font-family: inherit;
+    letter-spacing: inherit;
+    line-height: inherit;
+    text-transform: none;
     text-align: left;
     cursor: pointer;
-    line-height: 1.2;
     appearance: none;
     -webkit-appearance: none;
 }
 
-.match button.mrm-bracket-scored-row:last-child {
+.match button.player:last-child {
     border-bottom: none;
 }
 
-.mrm-bracket-scored-row .player-info {
-    display: flex;
-    align-items: center;
-    gap: 0.65rem;
-    min-width: 0;
-    flex: 1;
+.match button.player:disabled {
+    cursor: default;
+    opacity: 1;
 }
 
-.mrm-bracket-scored-row .mrm-bracket-head,
-.mrm-bracket-scored-row .player-head {
-    flex-shrink: 0;
+.match button.player.mrm-bracket-tbd:disabled,
+.match button.player.mrm-bracket-tbd:disabled .player-name {
+    color: #d0d0d0;
+    -webkit-text-fill-color: #d0d0d0;
+    opacity: 1;
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: normal;
 }
 
-.mrm-bracket-scored-row .mrm-bracket-name {
-    flex: 1;
-    min-width: 0;
+.match button.player.mrm-bracket-tbd:disabled .player-score {
+    color: #aaa;
+    -webkit-text-fill-color: #aaa;
+    font-size: 0.8rem;
+    font-weight: 700;
 }
 
-.mrm-bracket-scored-row .mrm-bracket-score-area {
-    flex-shrink: 0;
-    text-align: right;
+.match button.player:focus-visible {
+    outline: 2px solid #86CE34;
+    outline-offset: -2px;
+    z-index: 1;
 }
 
 .mrm-bracket-scored-row--disabled {
     cursor: default;
-    opacity: 0.85;
-}
-
-.match button.mrm-bracket-scored-row:focus-visible {
-    outline: 2px solid #86CE34;
-    outline-offset: -2px;
-    z-index: 1;
 }
 
 .group-table.mrm-group-table--locked {
