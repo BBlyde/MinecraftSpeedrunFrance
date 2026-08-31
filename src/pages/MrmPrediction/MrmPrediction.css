@@ -584,29 +584,45 @@
     z-index: 2;
 }
 
-.mrm-container.mrm-prediction .group-table tbody tr.row-qualify td.col-rank,
-.mrm-container.mrm-prediction .group-table tbody tr.row-qualify td.col-player {
-    background-color: #252b32;
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.row-qualify td.col-rank,
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.row-qualify td.col-player {
+    background-color: #161b22;
+    background-image: linear-gradient(#ffffff18, #ffffff18);
 }
 
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.mrm-group-row-result-correct td.col-rank,
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.mrm-group-row-result-correct td.col-player {
+    background-color: #161b22;
+    background-image: linear-gradient(rgba(134, 206, 52, 0.16), rgba(134, 206, 52, 0.16));
+}
+
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.mrm-group-row-result-near td.col-rank,
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.mrm-group-row-result-near td.col-player {
+    background-color: #161b22;
+    background-image: linear-gradient(rgba(255, 202, 40, 0.14), rgba(255, 202, 40, 0.14));
+}
+
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.mrm-group-row-result-wrong td.col-rank,
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.mrm-group-row-result-wrong td.col-player {
+    background-color: #161b22;
+    background-image: linear-gradient(rgba(173, 54, 54, 0.16), rgba(173, 54, 54, 0.16));
+}
+
+.mrm-container.mrm-prediction .group-table tbody tr:hover,
+.mrm-container.mrm-prediction .group-table tbody tr.row-qualify:hover {
+    background: rgba(75, 75, 75, 0.2);
+}
+
+.mrm-container.mrm-prediction .group-table tbody tr:hover td,
+.mrm-container.mrm-prediction .group-table tbody tr.row-qualify:hover td,
+.mrm-container.mrm-prediction .group-table tbody tr:hover td.col-rank,
+.mrm-container.mrm-prediction .group-table tbody tr:hover td.col-player,
 .mrm-container.mrm-prediction .group-table tbody tr.row-qualify:hover td.col-rank,
-.mrm-container.mrm-prediction .group-table tbody tr.row-qualify:hover td.col-player {
-    background-color: #32383f;
-}
-
-.mrm-container.mrm-prediction .group-table tbody tr.mrm-group-row-result-correct td.col-rank,
-.mrm-container.mrm-prediction .group-table tbody tr.mrm-group-row-result-correct td.col-player {
-    background-color: #2e3a24;
-}
-
-.mrm-container.mrm-prediction .group-table tbody tr.mrm-group-row-result-near td.col-rank,
-.mrm-container.mrm-prediction .group-table tbody tr.mrm-group-row-result-near td.col-player {
-    background-color: #3a3420;
-}
-
-.mrm-container.mrm-prediction .group-table tbody tr.mrm-group-row-result-wrong td.col-rank,
-.mrm-container.mrm-prediction .group-table tbody tr.mrm-group-row-result-wrong td.col-player {
-    background-color: #332222;
+.mrm-container.mrm-prediction .group-table tbody tr.row-qualify:hover td.col-player,
+.mrm-container.mrm-prediction .group-table tbody tr.mrm-group-row-result-correct:hover td,
+.mrm-container.mrm-prediction .group-table tbody tr.mrm-group-row-result-near:hover td,
+.mrm-container.mrm-prediction .group-table tbody tr.mrm-group-row-result-wrong:hover td {
+    background: rgba(75, 75, 75, 0.2);
 }
 
 .mrm-sortable-row {
@@ -750,12 +766,24 @@
     }
 
     .mrm-container.mrm-prediction .container,
-    .mrm-container.mrm-prediction .container-first,
-    .mrm-container.mrm-prediction .container-second,
     .mrm-container.mrm-prediction .mrm-groups {
         width: 100%;
         max-width: 100%;
         min-width: 0;
+    }
+
+    .mrm-container.mrm-prediction .container-first {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        gap: 2.75rem;
+    }
+
+    .mrm-container.mrm-prediction .container-second {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        margin-top: 2.75rem;
     }
 
     .mrm-container.mrm-prediction .mrm-playoffs {

@@ -3,6 +3,61 @@ import './MrmS11.css'
 import { Link } from 'react-router-dom'
 
 const BRACKET_PLACEHOLDER_UUID = '0385'
+const LCQ_SIZE = 16
+const LCQ_SEED_COUNT = 8
+const LCQ_QUALIFY = 4
+
+function formatLcqDelta(value) {
+  if (typeof value === 'string' && value.trim().startsWith('+')) {
+    return value.trim()
+  }
+  const n = Number(value)
+  const totalSeconds = Number.isFinite(n) ? Math.max(0, Math.round(n)) : 0
+  const minutes = Math.floor(totalSeconds / 60)
+  const seconds = totalSeconds % 60
+  return `+${minutes}:${String(seconds).padStart(2, '0')}`
+}
+
+function normalizeLcqPlayer(row) {
+  if (!row || typeof row !== 'object') return null
+  const name = typeof row.name === 'string' ? row.name : ''
+  const uuid = typeof row.uuid === 'string' ? row.uuid : typeof row.id === 'string' ? row.id : ''
+  const num = (key) => {
+    const v = row[key]
+    if (v == null) return 0
+    const n = Number(v)
+    return Number.isFinite(n) ? n : 0
+  }
+  const player = { name, uuid, total: num('total') }
+  for (let i = 1; i <= LCQ_SEED_COUNT; i += 1) {
+    player[`s${i}`] = num(`s${i}`)
+  }
+  if (!player.total) {
+    player.total = Array.from({ length: LCQ_SEED_COUNT }, (_, i) => player[`s${i + 1}`] ?? 0)
+      .reduce((sum, value) => sum + value, 0)
+  }
+  return player
+}
+
+function normalizeLcqFromApi(apiRows) {
+  if (!Array.isArray(apiRows)) return []
+  return apiRows.map(normalizeLcqPlayer).filter(Boolean)
+}
+
+function placeholderLcqPlayers() {
+  return Array.from({ length: LCQ_SIZE }, () => {
+    const player = { name: 'TBD', uuid: '', total: 0 }
+    for (let i = 1; i <= LCQ_SEED_COUNT; i += 1) player[`s${i}`] = 0
+    return player
+  })
+}
+
+function applyLcqFromTournament(data, setLcqPlayers) {
+  const fromApi = normalizeLcqFromApi(data?.lcq ?? data?.group1)
+  if (fromApi.length > 0) {
+    setLcqPlayers([...fromApi].sort((a, b) => Number(a.total) - Number(b.total)))
+  }
+}
 
 function BracketSlot({ player }) {
   const uuid = player?.id || BRACKET_PLACEHOLDER_UUID
@@ -21,11 +76,16 @@ function BracketSlot({ player }) {
 
 function MrmS11() {
   const [mrmData, setMrmData] = useState(null)
+  const [lcqPlayers, setLcqPlayers] = useState(() => placeholderLcqPlayers())
 
   useEffect(() => {
     fetch('/api/tournament/mrm11')
-      .then((res) => res.json())
-      .then((data) => setMrmData(data))
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!data) return
+        setMrmData(data)
+        applyLcqFromTournament(data, setLcqPlayers)
+      })
       .catch((err) => console.error('Erreur chargement données MRM S11', err))
 
     const ws = new WebSocket('wss://back.mcsr-game.com/ws/tournament')
@@ -33,8 +93,21 @@ function MrmS11() {
     ws.onopen = () => console.log('WebSocket connectée')
 
     ws.onmessage = (event) => {
-      const data = JSON.parse(event.data)
-      if (data?.bracket?.round16) setMrmData(data)
+      try {
+        const data = JSON.parse(event.data)
+        const hasLcq = Array.isArray(data?.lcq)
+        const hasS11Bracket = Boolean(data?.bracket?.round16)
+        if (!hasLcq && !hasS11Bracket) return
+        setMrmData((prev) => ({
+          ...(prev ?? {}),
+          ...data,
+          lcq: hasLcq ? data.lcq : prev?.lcq,
+          bracket: data.bracket ?? prev?.bracket,
+        }))
+        if (hasLcq) applyLcqFromTournament(data, setLcqPlayers)
+      } catch (err) {
+        console.error('WebSocket message MRM S11', err)
+      }
     }
 
     ws.onerror = (err) => console.error('WebSocket erreur MRM S11', err)
@@ -183,35 +256,37 @@ function MrmS11() {
           <div className="mrm-groups">
             <h2 className="playoffs-title">LAST CHANCE QUALIFIER</h2>
             <div className="group-table group-table-lcq">
-              <div className="group-title">&nbsp;</div>
+              <div className="group-title">LCQ</div>
               <div className="group-table-scroll">
                 <table>
                   <thead>
                     <tr>
                       <th className="col-rank">#</th>
                       <th className="col-player">Runner</th>
-                      {Array.from({ length: 8 }, (_, i) => <th key={i}>S{i + 1}</th>)}
+                      {Array.from({ length: LCQ_SEED_COUNT }, (_, i) => <th key={i}>S{i + 1}</th>)}
                       <th>Total</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {Array.from({ length: 8 }, (_, i) => (
-                      <tr key={i} className={i < 4 ? 'row-qualify' : ''}>
+                    {lcqPlayers.map((player, i) => (
+                      <tr key={player.uuid || player.name || i} className={i < LCQ_QUALIFY ? 'row-qualify' : ''}>
                         <td className="col-rank">{i + 1}</td>
                         <td className="col-player">
-                          <img src={`https://mc-heads.net/avatar/${BRACKET_PLACEHOLDER_UUID}/48`} className="player-head" />
-                          TBD
+                          <img
+                            src={`https://mc-heads.net/avatar/${player.uuid || BRACKET_PLACEHOLDER_UUID}/48`}
+                            className="player-head"
+                            alt=""
+                          />
+                          &nbsp;
+                          &nbsp;
+                          {player.name || 'TBD'}
                         </td>
-                        {Array.from({ length: 8 }, (_, seed) => <td key={seed}>+0:00</td>)}
-                        <td className="col-pts">+0:00</td>
+                        {Array.from({ length: LCQ_SEED_COUNT }, (_, seed) => (
+                          <td key={seed}>{formatLcqDelta(player[`s${seed + 1}`])}</td>
+                        ))}
+                        <td className="col-pts">{formatLcqDelta(player.total)}</td>
                       </tr>
                     ))}
-                    <tr className="group-table-more">
-                      <td className="col-rank">...</td>
-                      <td className="col-player">...</td>
-                      {Array.from({ length: 8 }, (_, seed) => <td key={seed}>...</td>)}
-                      <td className="col-pts">...</td>
-                    </tr>
                   </tbody>
                 </table>
               </div>
