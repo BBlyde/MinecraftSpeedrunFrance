@@ -1090,6 +1090,7 @@ function MrmPredictionS11({ season = 11 }) {
                 seedCount={LCQ_SEED_COUNT}
                 qualifyCount={LCQ_QUALIFY}
                 tableClassName="group-table-lcq"
+                scoreDisplay="delta"
                 getRowResultClass={(baselineIdx, rank) =>
                   groupRowResultClass(baselineIdx, rank, officialLcqBands, lcqScored)}
               />

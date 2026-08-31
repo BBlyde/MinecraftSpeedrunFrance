@@ -584,31 +584,23 @@ function BracketScoredPlayerRow({
     !player.name ||
     String(player.name).trim() === '' ||
     player.name === 'TBD'
-  if (isTbd) {
-    return (
-      <div className={['player', 'tbd', comparisonClass].filter(Boolean).join(' ')}>
-        <div className="player-info">
-          <img src={DEFAULT_HEAD} alt="" className="player-head" width={24} height={24} />
-          <span>TBD</span>
-        </div>
-        <span className="player-score">{scoreValue}</span>
-      </div>
-    )
-  }
+  const displayName = isTbd ? 'TBD' : player.name
   const isLoser =
+    !isTbd &&
     winnerPid != null &&
     !isWinner &&
     comparisonClass !== 'mrm-match-result-official'
   const showPickedWinnerHighlight =
-    isWinner && (!resultsRevealed || comparisonClass === 'mrm-match-result-correct')
+    !isTbd && isWinner && (!resultsRevealed || comparisonClass === 'mrm-match-result-correct')
+  const canPick = pickable && !isTbd
   const rowCls = ['mrm-bracket-scored-row']
   if (comparisonClass) rowCls.push(comparisonClass)
   if (showPickedWinnerHighlight) rowCls.push('mrm-match-winner')
   else if (isLoser) rowCls.push('mrm-match-loser')
-  if (!pickable) rowCls.push('mrm-bracket-scored-row--disabled')
+  if (!canPick) rowCls.push('mrm-bracket-scored-row--disabled')
 
   const handleRowClick = () => {
-    if (!pickable || !Array.isArray(matchScores) || matchScores.length !== 2) return
+    if (!canPick || !Array.isArray(matchScores) || matchScores.length !== 2) return
     const [a, b] = matchScores
     const next = applyScoreDigitClick(matchScores, side, maxScore)
     if (next[0] !== a || next[1] !== b) {
@@ -622,12 +614,18 @@ function BracketScoredPlayerRow({
     <button
       type="button"
       className={rowCls.filter(Boolean).join(' ')}
-      disabled={!pickable}
+      disabled={!canPick}
       onClick={handleRowClick}
-      aria-label={`${player.name}, ${scoreValue} jeu(x)`}
+      aria-label={`${displayName}, ${scoreValue} jeu(x)`}
     >
-      <img src={mcHeadUrl(player.uuid)} alt="" className="player-head mrm-bracket-head" width={24} height={24} />
-      <span className="mrm-bracket-name">{player.name}</span>
+      <img
+        src={isTbd ? DEFAULT_HEAD : mcHeadUrl(player.uuid)}
+        alt=""
+        className="player-head mrm-bracket-head"
+        width={24}
+        height={24}
+      />
+      <span className="mrm-bracket-name">{displayName}</span>
       <span className="mrm-bracket-score-area player-score">{scoreValue}</span>
     </button>
   )

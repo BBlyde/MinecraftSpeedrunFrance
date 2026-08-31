@@ -216,6 +216,18 @@ export function placeholderPlayers(count, seedCount = 8) {
   })
 }
 
+/** LCQ seed delta: seconds → `+0:00`. */
+export function formatLcqDelta(value) {
+  if (typeof value === 'string' && value.trim().startsWith('+')) {
+    return value.trim()
+  }
+  const n = Number(value)
+  const totalSeconds = Number.isFinite(n) ? Math.max(0, Math.round(n)) : 0
+  const minutes = Math.floor(totalSeconds / 60)
+  const seconds = totalSeconds % 60
+  return `+${minutes}:${String(seconds).padStart(2, '0')}`
+}
+
 export function buildRankBandsForBaseline(baseline) {
   if (!Array.isArray(baseline) || baseline.length === 0) return {}
   const indices = baseline.map((_, i) => i)
@@ -458,7 +470,9 @@ export function SortableGroupTable({
   seedCount = 6,
   qualifyCount = 2,
   tableClassName = '',
+  scoreDisplay = 'points',
 }) {
+  const formatScore = scoreDisplay === 'delta' ? formatLcqDelta : (value) => value ?? 0
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 6 } }),
     useSensor(TouchSensor, { activationConstraint: { distance: 6 } }),
@@ -518,9 +532,9 @@ export function SortableGroupTable({
                         {p?.name || 'TBD'}
                       </td>
                       {Array.from({ length: seedCount }, (_, i) => (
-                        <td key={i}>{p?.[`s${i + 1}`] ?? 0}</td>
+                        <td key={i}>{formatScore(p?.[`s${i + 1}`] ?? 0)}</td>
                       ))}
-                      <td className="col-pts">{p?.total ?? 0}</td>
+                      <td className="col-pts">{formatScore(p?.total ?? 0)}</td>
                     </SortableGroupRow>
                   )
                 })}
@@ -554,31 +568,23 @@ export function BracketScoredPlayerRow({
     !player.name ||
     String(player.name).trim() === '' ||
     player.name === 'TBD'
-  if (isTbd) {
-    return (
-      <div className={['player', 'tbd', comparisonClass].filter(Boolean).join(' ')}>
-        <div className="player-info">
-          <img src={DEFAULT_HEAD} alt="" className="player-head" width={24} height={24} />
-          <span>TBD</span>
-        </div>
-        <span className="player-score">{scoreValue}</span>
-      </div>
-    )
-  }
+  const displayName = isTbd ? 'TBD' : player.name
   const isLoser =
+    !isTbd &&
     winnerPid != null &&
     !isWinner &&
     comparisonClass !== 'mrm-match-result-official'
   const showPickedWinnerHighlight =
-    isWinner && (!resultsRevealed || comparisonClass === 'mrm-match-result-correct')
+    !isTbd && isWinner && (!resultsRevealed || comparisonClass === 'mrm-match-result-correct')
+  const canPick = pickable && !isTbd
   const rowCls = ['mrm-bracket-scored-row']
   if (comparisonClass) rowCls.push(comparisonClass)
   if (showPickedWinnerHighlight) rowCls.push('mrm-match-winner')
   else if (isLoser) rowCls.push('mrm-match-loser')
-  if (!pickable) rowCls.push('mrm-bracket-scored-row--disabled')
+  if (!canPick) rowCls.push('mrm-bracket-scored-row--disabled')
 
   const handleRowClick = () => {
-    if (!pickable || !Array.isArray(matchScores) || matchScores.length !== 2) return
+    if (!canPick || !Array.isArray(matchScores) || matchScores.length !== 2) return
     const [a, b] = matchScores
     const next = applyScoreDigitClick(matchScores, side, maxScore)
     if (next[0] !== a || next[1] !== b) {
@@ -592,12 +598,18 @@ export function BracketScoredPlayerRow({
     <button
       type="button"
       className={rowCls.filter(Boolean).join(' ')}
-      disabled={!pickable}
+      disabled={!canPick}
       onClick={handleRowClick}
-      aria-label={`${player.name}, ${scoreValue} jeu(x)`}
+      aria-label={`${displayName}, ${scoreValue} jeu(x)`}
     >
-      <img src={mcHeadUrl(player.uuid)} alt="" className="player-head mrm-bracket-head" width={24} height={24} />
-      <span className="mrm-bracket-name">{player.name}</span>
+      <img
+        src={isTbd ? DEFAULT_HEAD : mcHeadUrl(player.uuid)}
+        alt=""
+        className="player-head mrm-bracket-head"
+        width={24}
+        height={24}
+      />
+      <span className="mrm-bracket-name">{displayName}</span>
       <span className="mrm-bracket-score-area player-score">{scoreValue}</span>
     </button>
   )
