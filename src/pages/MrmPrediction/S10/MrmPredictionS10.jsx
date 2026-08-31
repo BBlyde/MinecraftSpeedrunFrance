@@ -18,6 +18,7 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import '../MrmPrediction.css'
+import '../../Mrm/S10/MrmS10.css'
 import { reconcileOrder } from '../../Mrm/mrmPredictionStorage'
 import MrmPronosLeaderboard from '../../Mrm/MrmPronosLeaderboard'
 import { discordAvatarUrl, discordDisplayName } from '../../../utils/discordUser'
@@ -1454,7 +1455,7 @@ function MrmPredictionS10({ season = 10 }) {
   }
 
   return (
-    <>
+    <div className="mrm-prediction-season">
       {readOnly && viewLoadError === 'not_found' ? (
         <div className="mrm-prediction-auth-banner mrm-prediction-auth-banner--locks" role="status">
           <span>Ce joueur n&apos;est pas dans le classement ou n&apos;a pas de pronostiques.</span>
@@ -1853,7 +1854,7 @@ function MrmPredictionS10({ season = 10 }) {
 
         </div>
       </div>
-    </>
+    </div>
   )
 }
 

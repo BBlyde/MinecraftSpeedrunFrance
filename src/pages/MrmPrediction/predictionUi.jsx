@@ -496,8 +496,9 @@ export function SortableGroupTable({
 
   return (
     <div className={`group-table group-table-${groupNum} ${tableClassName} ${isLocked ? 'mrm-group-table--locked' : ''}`.trim()}>
+      {groupTitle ? <div className={`group-title ${titleClassName}`}>{groupTitle}</div> : null}
       <div className="group-table-scroll">
-        {groupTitle ? <div className={`group-title ${titleClassName}`}>{groupTitle}</div> : null}
+        <div className="group-table-scroll-inner">
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
           <table>
             <thead>
@@ -542,6 +543,7 @@ export function SortableGroupTable({
             </tbody>
           </table>
         </DndContext>
+        </div>
       </div>
     </div>
   )

@@ -3,6 +3,25 @@
     text-align: center;
 }
 
+.mrm-container.mrm-prediction {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+.mrm-container.mrm-prediction > .mrm-s11,
+.mrm-prediction-season,
+.mrm-container.mrm-prediction .mrm-prediction-content-wrap,
+.mrm-container.mrm-prediction .container,
+.mrm-container.mrm-prediction .container-first,
+.mrm-container.mrm-prediction .container-second,
+.mrm-container.mrm-prediction .mrm-groups {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+}
+
 .mrm-prediction-auth-banner {
     display: flex;
     flex-wrap: wrap;
@@ -516,6 +535,61 @@
     flex-shrink: 0;
 }
 
+.mrm-container.mrm-prediction .group-table-scroll {
+    overflow-x: auto;
+    width: 100%;
+    max-width: 100%;
+    -webkit-overflow-scrolling: touch;
+}
+
+.mrm-container.mrm-prediction .group-table-scroll-inner {
+    display: inline-block;
+    min-width: 100%;
+    vertical-align: top;
+}
+
+.mrm-container.mrm-prediction .group-title {
+    width: 100%;
+    box-sizing: border-box;
+    flex-shrink: 0;
+}
+
+.mrm-container.mrm-prediction .group-table table {
+    width: 100%;
+}
+
+.mrm-container.mrm-prediction .group-table th.col-rank,
+.mrm-container.mrm-prediction .group-table td.col-rank,
+.mrm-container.mrm-prediction .group-table th.col-player,
+.mrm-container.mrm-prediction .group-table td.col-player {
+    z-index: 2;
+}
+
+.mrm-container.mrm-prediction .group-table tbody tr.row-qualify td.col-rank,
+.mrm-container.mrm-prediction .group-table tbody tr.row-qualify td.col-player {
+    background-color: #252b32;
+}
+
+.mrm-container.mrm-prediction .group-table tbody tr.row-qualify:hover td.col-rank,
+.mrm-container.mrm-prediction .group-table tbody tr.row-qualify:hover td.col-player {
+    background-color: #32383f;
+}
+
+.mrm-container.mrm-prediction .group-table tbody tr.mrm-group-row-result-correct td.col-rank,
+.mrm-container.mrm-prediction .group-table tbody tr.mrm-group-row-result-correct td.col-player {
+    background-color: #2e3a24;
+}
+
+.mrm-container.mrm-prediction .group-table tbody tr.mrm-group-row-result-near td.col-rank,
+.mrm-container.mrm-prediction .group-table tbody tr.mrm-group-row-result-near td.col-player {
+    background-color: #3a3420;
+}
+
+.mrm-container.mrm-prediction .group-table tbody tr.mrm-group-row-result-wrong td.col-rank,
+.mrm-container.mrm-prediction .group-table tbody tr.mrm-group-row-result-wrong td.col-player {
+    background-color: #332222;
+}
+
 .mrm-sortable-row {
     cursor: grab;
     touch-action: none;
@@ -620,5 +694,86 @@
     .mrm-bracket-name {
         max-width: 4.5rem;
         font-size: 0.72rem;
+    }
+}
+
+@media (max-width: 990px) {
+    .mrm-prediction-auth-banner,
+    .mrm-prediction-view-banner {
+        max-width: calc(100% - 1.5rem);
+        margin-left: 0.75rem;
+        margin-right: 0.75rem;
+        padding: 0.65rem 0.85rem;
+        font-size: 0.62rem;
+        text-align: center;
+    }
+
+    .mrm-prediction-view-banner-main {
+        flex-wrap: wrap;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .mrm-prediction-hint-slot {
+        max-width: 100%;
+        padding: 0 0.75rem;
+    }
+
+    .mrm-prediction-hint {
+        font-size: 0.75rem;
+    }
+
+    .mrm-prediction-groups-head,
+    .mrm-prediction-playoffs-head {
+        width: 100%;
+        padding: 0 0.5rem;
+        box-sizing: border-box;
+    }
+
+    .mrm-container.mrm-prediction .mrm-playoffs {
+        overflow-x: auto;
+        max-width: 100%;
+        width: 100%;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .mrm-container.mrm-prediction .group-table {
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .mrm-container.mrm-prediction .group-table-lcq table {
+        min-width: 720px;
+    }
+}
+
+@media (max-width: 770px) {
+    .mrm-container.mrm-prediction .mrm-playoffs {
+        align-items: flex-start;
+    }
+}
+
+@media (max-width: 480px) {
+    .mrm-prediction-auth-banner,
+    .mrm-prediction-view-banner {
+        letter-spacing: 0.4px;
+        font-size: 0.58rem;
+        padding: 0.55rem 0.7rem;
+    }
+
+    .mrm-prediction-scoring-toggle,
+    .mrm-prediction-leaderboard-toggle {
+        padding: 0.4rem 0.65rem;
+        font-size: 0.72rem;
+    }
+
+    .mrm-prediction-content-wrap {
+        padding-bottom: 5.25rem;
+    }
+
+    .mrm-container.mrm-prediction .group-table th,
+    .mrm-container.mrm-prediction .group-table td {
+        padding: 0.35rem 0.5rem;
+        font-size: 0.7rem;
     }
 }
