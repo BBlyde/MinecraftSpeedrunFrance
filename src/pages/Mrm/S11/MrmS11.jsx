@@ -58,7 +58,7 @@ function BracketSlot({ player }) {
     <div className="player">
       <div className="player-info">
         <img src={`https://mc-heads.net/avatar/${uuid}/48`} className="player-head" width={24} height={24} />
-        <span className='player-name'>{name}</span>
+        <span className='player-name'>{name ? name : 'TBD'}</span>
       </div>
       <span className="player-score">{score}</span>
     </div>
@@ -216,7 +216,7 @@ function MrmS11() {
                 <div className="podium-head">
                   <img src={`https://mc-heads.net/avatar/${BRACKET_PLACEHOLDER_UUID}/48`} className="player-head" />
                 </div>
-                <div className="podium-name"></div>
+                <div className="podium-name">TBD</div>
                 <div className="podium-block podium-block-second">
                   <span className="podium-rank">2</span>
                 </div>
@@ -225,7 +225,7 @@ function MrmS11() {
                 <div className="podium-head">
                   <img src={`https://mc-heads.net/avatar/${BRACKET_PLACEHOLDER_UUID}/48`} className="player-head" />
                 </div>
-                <div className="podium-name"></div>
+                <div className="podium-name">TBD</div>
                 <div className="podium-block podium-block-first">
                   <span className="podium-rank">1</span>
                 </div>
@@ -234,7 +234,7 @@ function MrmS11() {
                 <div className="podium-head">
                   <img src={`https://mc-heads.net/avatar/${BRACKET_PLACEHOLDER_UUID}/48`} className="player-head" />
                 </div>
-                <div className="podium-name"></div>
+                <div className="podium-name">TBD</div>
                 <div className="podium-block podium-block-third">
                   <span className="podium-rank">3</span>
                 </div>

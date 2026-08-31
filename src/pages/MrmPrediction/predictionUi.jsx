@@ -604,14 +604,16 @@ export function BracketScoredPlayerRow({
       onClick={handleRowClick}
       aria-label={`${displayName}, ${scoreValue} jeu(x)`}
     >
-      <img
-        src={isTbd ? DEFAULT_HEAD : mcHeadUrl(player.uuid)}
-        alt=""
-        className="player-head mrm-bracket-head"
-        width={24}
-        height={24}
-      />
-      <span className="mrm-bracket-name">{displayName}</span>
+      <span className="player-info">
+        <img
+          src={isTbd ? DEFAULT_HEAD : mcHeadUrl(player.uuid)}
+          alt=""
+          className="player-head mrm-bracket-head"
+          width={24}
+          height={24}
+        />
+        <span className="mrm-bracket-name player-name">{displayName}</span>
+      </span>
       <span className="mrm-bracket-score-area player-score">{scoreValue}</span>
     </button>
   )

@@ -721,13 +721,11 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    max-width: 7rem;
     min-width: 0;
 }
 
 @media (max-width: 768px) {
     .mrm-bracket-name {
-        max-width: 4.5rem;
         font-size: 0.72rem;
     }
 }
