@@ -3,7 +3,6 @@ import './MrmS11.css'
 import { Link } from 'react-router-dom'
 
 const BRACKET_PLACEHOLDER_UUID = '0385'
-const LCQ_SIZE = 16
 const LCQ_SEED_COUNT = 8
 const LCQ_QUALIFY = 4
 
@@ -44,14 +43,6 @@ function normalizeLcqFromApi(apiRows) {
   return apiRows.map(normalizeLcqPlayer).filter(Boolean)
 }
 
-function placeholderLcqPlayers() {
-  return Array.from({ length: LCQ_SIZE }, () => {
-    const player = { name: 'TBD', uuid: '', total: 0 }
-    for (let i = 1; i <= LCQ_SEED_COUNT; i += 1) player[`s${i}`] = 0
-    return player
-  })
-}
-
 function applyLcqFromTournament(data, setLcqPlayers) {
   const fromApi = normalizeLcqFromApi(data?.lcq ?? data?.group1)
   if (fromApi.length > 0) {
@@ -67,7 +58,7 @@ function BracketSlot({ player }) {
     <div className="player">
       <div className="player-info">
         <img src={`https://mc-heads.net/avatar/${uuid}/48`} className="player-head" width={24} height={24} />
-        <span className='player-name'>{name ? name : 'TBD'}</span>
+        <span className='player-name'>{name}</span>
       </div>
       <span className="player-score">{score}</span>
     </div>
@@ -76,7 +67,7 @@ function BracketSlot({ player }) {
 
 function MrmS11() {
   const [mrmData, setMrmData] = useState(null)
-  const [lcqPlayers, setLcqPlayers] = useState(() => placeholderLcqPlayers())
+  const [lcqPlayers, setLcqPlayers] = useState([])
 
   useEffect(() => {
     fetch('/api/tournament/mrm11')
@@ -225,7 +216,7 @@ function MrmS11() {
                 <div className="podium-head">
                   <img src={`https://mc-heads.net/avatar/${BRACKET_PLACEHOLDER_UUID}/48`} className="player-head" />
                 </div>
-                <div className="podium-name">TBD</div>
+                <div className="podium-name"></div>
                 <div className="podium-block podium-block-second">
                   <span className="podium-rank">2</span>
                 </div>
@@ -234,7 +225,7 @@ function MrmS11() {
                 <div className="podium-head">
                   <img src={`https://mc-heads.net/avatar/${BRACKET_PLACEHOLDER_UUID}/48`} className="player-head" />
                 </div>
-                <div className="podium-name">TBD</div>
+                <div className="podium-name"></div>
                 <div className="podium-block podium-block-first">
                   <span className="podium-rank">1</span>
                 </div>
@@ -243,7 +234,7 @@ function MrmS11() {
                 <div className="podium-head">
                   <img src={`https://mc-heads.net/avatar/${BRACKET_PLACEHOLDER_UUID}/48`} className="player-head" />
                 </div>
-                <div className="podium-name">TBD</div>
+                <div className="podium-name"></div>
                 <div className="podium-block podium-block-third">
                   <span className="podium-rank">3</span>
                 </div>
@@ -279,7 +270,7 @@ function MrmS11() {
                           />
                           &nbsp;
                           &nbsp;
-                          {player.name || 'TBD'}
+                          {player.name}
                         </td>
                         {Array.from({ length: LCQ_SEED_COUNT }, (_, seed) => (
                           <td key={seed}>{formatLcqDelta(player[`s${seed + 1}`])}</td>
