@@ -12,11 +12,7 @@
 
 .mrm-container.mrm-prediction > .mrm-s11,
 .mrm-prediction-season,
-.mrm-container.mrm-prediction .mrm-prediction-content-wrap,
-.mrm-container.mrm-prediction .container,
-.mrm-container.mrm-prediction .container-first,
-.mrm-container.mrm-prediction .container-second,
-.mrm-container.mrm-prediction .mrm-groups {
+.mrm-container.mrm-prediction .mrm-prediction-content-wrap {
     width: 100%;
     max-width: 100%;
     min-width: 0;
@@ -728,6 +724,15 @@
         width: 100%;
         padding: 0 0.5rem;
         box-sizing: border-box;
+    }
+
+    .mrm-container.mrm-prediction .container,
+    .mrm-container.mrm-prediction .container-first,
+    .mrm-container.mrm-prediction .container-second,
+    .mrm-container.mrm-prediction .mrm-groups {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
     }
 
     .mrm-container.mrm-prediction .mrm-playoffs {
