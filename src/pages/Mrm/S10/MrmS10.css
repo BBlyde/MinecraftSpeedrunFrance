@@ -478,16 +478,21 @@
 
 .group-table tbody tr {
     border-bottom: 1px solid #222;
-    transition: background 0.15s;
-}
-
-.group-table tbody tr:last-child {
-    border-bottom: none;
+    transition: background-color 0.15s ease;
 }
 
 .group-table tbody tr:hover,
 .group-table tbody tr.row-qualify:hover {
     background: rgba(75, 75, 75, 0.2);
+}
+
+.group-table tbody tr:hover td,
+.group-table tbody tr.row-qualify:hover td {
+    background: rgba(75, 75, 75, 0.2);
+}
+
+.group-table tbody tr:last-child {
+    border-bottom: none;
 }
 
 .group-table tbody tr.mrm-group-row-result-correct {

@@ -21,7 +21,7 @@ import netheriteImg from '../../assets/netherite.png'
 import { minecraftHeadUrl } from '../../utils/minecraftHead'
 
 // Default season & limit for LCQ qualification check
-const CURRENT_SEASON = 11
+const CURRENT_SEASON = 12
 const TOP_LCQ_PLAYERS_COUNT = 60
 
 const LeaderboardRanked = () => {
@@ -64,7 +64,7 @@ const LeaderboardRanked = () => {
 
       // Only compute LCQ qualification for the current season, waiting for every
       // per-runner check before the leaderboard is shown
-      if (Number(season) === CURRENT_SEASON) {
+      if (Number(season) === CURRENT_SEASON - 1) {
         const topLcqPlayers = nextPlayers.filter((player) => Number(player.placement) <= TOP_LCQ_PLAYERS_COUNT)
         const lcqChecks = await Promise.allSettled(
           topLcqPlayers.map(async (player) => {
@@ -262,8 +262,8 @@ const LeaderboardRanked = () => {
             <span className="ranked-title">CLASSEMENT RANKED </span><span className="ranked-season">S{season}</span>
             <button
               className="season-arrow"
-              onClick={() => season < 11 && navigate(`/ranked?season=${season + 1}`)}
-              disabled={season >= 11}
+              onClick={() => season < CURRENT_SEASON && navigate(`/ranked?season=${season + 1}`)}
+              disabled={season >= CURRENT_SEASON}
               aria-label="Saison suivante"
             >&gt;</button>
           </h1>
@@ -369,7 +369,7 @@ const LeaderboardRanked = () => {
                             </div>
                           </td>
                         </tr>
-                        {season === CURRENT_SEASON && player.placement === 12 && (
+                        {season === CURRENT_SEASON - 1 && player.placement === 12 && (
                           <tr className="qualification-threshold">
                             <td colSpan="3">
                               <div className="threshold-line">
