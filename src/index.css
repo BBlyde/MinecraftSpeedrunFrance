@@ -54,8 +54,9 @@ a:active {
 /* ── Composants partagés ── */
 
 .player-head {
-  width: 24px;
-  height: 24px;
+  /* Source 64px recalé à l’ancienne taille 48 : 64 / (64/48) = 48, puis /2 pour le 24px */
+  width: calc(64px / (64 / 48) / 2);
+  height: calc(64px / (64 / 48) / 2);
   border-radius: 3px;
   flex-shrink: 0;
   image-rendering: pixelated;

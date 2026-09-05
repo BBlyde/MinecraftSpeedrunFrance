@@ -234,8 +234,8 @@
 
 .match .player-head,
 .match .mrm-bracket-head {
-    width: 24px;
-    height: 24px;
+    width: calc(64px / (64 / 48) / 2);
+    height: calc(64px / (64 / 48) / 2);
     border-radius: 4px;
     flex-shrink: 0;
     object-fit: cover;
@@ -325,8 +325,8 @@
 }
 
 .podium-head .player-head {
-    width: 48px;
-    height: 48px;
+    width: calc(64px / (64 / 48));
+    height: calc(64px / (64 / 48));
     border-radius: 4px;
 }
 
@@ -526,8 +526,8 @@
 }
 
 .group-table td.col-player .player-head {
-    width: 24px;
-    height: 24px;
+    width: calc(64px / (64 / 48) / 2);
+    height: calc(64px / (64 / 48) / 2);
     margin-right: 0.5rem;
     vertical-align: middle;
     border-radius: 4px;
