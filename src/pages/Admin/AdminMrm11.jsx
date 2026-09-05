@@ -49,7 +49,7 @@ function normalizeName(value) {
 }
 
 function playerHeadUrl(uuid) {
-  return `https://mc-heads.net/avatar/${uuid || '0385'}/48`
+  return `https://mc-heads.net/avatar/${uuid || '0385'}/64`
 }
 
 function playerMatches(player, winner) {

@@ -239,7 +239,7 @@ function AdminLcq() {
                     <tr key={player.uuid}>
                       <td className="col-rank">{i + 1}</td>
                       <td className="col-player">
-                        <img src={`https://mc-heads.net/avatar/${player.uuid}/48`} className="player-head" />
+                        <img src={`https://mc-heads.net/avatar/${player.uuid}/64`} className="player-head" />
                         &nbsp;&nbsp;
                         {player.nickname || player.uuid}
                       </td>

@@ -17,7 +17,7 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 
-export const DEFAULT_HEAD = 'https://mc-heads.net/avatar/0385/48'
+export const DEFAULT_HEAD = 'https://mc-heads.net/avatar/0385/64'
 
 export const DEFAULT_LOCK_STATE = {
   global: { locked: false, lockAt: null },
@@ -345,7 +345,7 @@ export function reorderPairScoreForSlots(score, from0, from1, slot0, slot1) {
 
 export function mcHeadUrl(uuid) {
   if (uuid != null && String(uuid).trim() !== '') {
-    return `https://mc-heads.net/avatar/${uuid}/48`
+    return `https://mc-heads.net/avatar/${uuid}/64`
   }
   return DEFAULT_HEAD
 }

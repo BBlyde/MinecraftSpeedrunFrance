@@ -57,7 +57,7 @@ function BracketSlot({ player }) {
   return (
     <div className="player">
       <div className="player-info">
-        <img src={`https://mc-heads.net/avatar/${uuid}/48`} className="player-head" width={24} height={24} />
+        <img src={`https://mc-heads.net/avatar/${uuid}/64`} className="player-head" width={24} height={24} />
         <span className='player-name'>{name ? name : 'TBD'}</span>
       </div>
       <span className="player-score">{score}</span>
@@ -214,7 +214,7 @@ function MrmS11() {
             <div className="podium-wrapper">
               <div className="podium-player podium-second">
                 <div className="podium-head">
-                  <img src={`https://mc-heads.net/avatar/${BRACKET_PLACEHOLDER_UUID}/48`} className="player-head" />
+                  <img src={`https://mc-heads.net/avatar/${BRACKET_PLACEHOLDER_UUID}/64`} className="player-head" />
                 </div>
                 <div className="podium-name">TBD</div>
                 <div className="podium-block podium-block-second">
@@ -223,7 +223,7 @@ function MrmS11() {
               </div>
               <div className="podium-player podium-first">
                 <div className="podium-head">
-                  <img src={`https://mc-heads.net/avatar/${BRACKET_PLACEHOLDER_UUID}/48`} className="player-head" />
+                  <img src={`https://mc-heads.net/avatar/${BRACKET_PLACEHOLDER_UUID}/64`} className="player-head" />
                 </div>
                 <div className="podium-name">TBD</div>
                 <div className="podium-block podium-block-first">
@@ -232,7 +232,7 @@ function MrmS11() {
               </div>
               <div className="podium-player podium-third">
                 <div className="podium-head">
-                  <img src={`https://mc-heads.net/avatar/${BRACKET_PLACEHOLDER_UUID}/48`} className="player-head" />
+                  <img src={`https://mc-heads.net/avatar/${BRACKET_PLACEHOLDER_UUID}/64`} className="player-head" />
                 </div>
                 <div className="podium-name">TBD</div>
                 <div className="podium-block podium-block-third">
@@ -264,7 +264,7 @@ function MrmS11() {
                         <td className="col-rank">{i + 1}</td>
                         <td className="col-player">
                           <img
-                            src={`https://mc-heads.net/avatar/${player.uuid || BRACKET_PLACEHOLDER_UUID}/48`}
+                            src={`https://mc-heads.net/avatar/${player.uuid || BRACKET_PLACEHOLDER_UUID}/64`}
                             className="player-head"
                             alt=""
                           />

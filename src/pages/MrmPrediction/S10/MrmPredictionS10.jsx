@@ -28,7 +28,7 @@ import PredictionAuthBanner from '../PredictionAuthBanner'
 
 const mrmPredictionApiUrl = predictionApiUrl('/prediction/mrm')
 
-const DEFAULT_HEAD = 'https://mc-heads.net/avatar/0385/48'
+const DEFAULT_HEAD = 'https://mc-heads.net/avatar/0385/64'
 const DEFAULT_LOCK_STATE = {
   global: { locked: false, lockAt: null },
   group1: { locked: false, lockAt: null },
@@ -392,7 +392,7 @@ function reorderPairScoreForSlots(score, from0, from1, slot0, slot1) {
 
 function mcHeadUrl(uuid) {
   if (uuid != null && String(uuid).trim() !== '') {
-    return `https://mc-heads.net/avatar/${uuid}/48`
+    return `https://mc-heads.net/avatar/${uuid}/64`
   }
   return DEFAULT_HEAD
 }
