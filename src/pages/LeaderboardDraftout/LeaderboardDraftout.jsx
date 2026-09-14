@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useSearchParams, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import './LeaderboardDraftout.css'
 import { minecraftHeadUrl } from '../../utils/minecraftHead'
 
 const API_URL = '/api/draftout/stats'
+const CURRENT_ERA = 2
 
 function formatTime(ms) {
   if (!ms) return '-'
@@ -21,6 +23,9 @@ function LeaderboardDraftout() {
   const [searchTerm, setSearchTerm] = useState('')
   const [hoveredPlayer, setHoveredPlayer] = useState(null)
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 })
+  const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
+  const era = parseInt(searchParams.get('era') || CURRENT_ERA, 10)
 
   const handleRowMouseEnter = useCallback((player, e) => {
     setHoveredPlayer(player)
@@ -36,8 +41,8 @@ function LeaderboardDraftout() {
   }, [])
 
   useEffect(() => {
-    fetchLeaderboard()
-  }, [])
+    fetchLeaderboard(era)
+  }, [era])
 
   useEffect(() => {
     const filtered = players.filter(player =>
@@ -46,10 +51,10 @@ function LeaderboardDraftout() {
     setFilteredPlayers(filtered)
   }, [searchTerm, players])
 
-  const fetchLeaderboard = async () => {
+  const fetchLeaderboard = async (era) => {
     try {
       setLoading(true)
-      const response = await axios.get(API_URL)
+      const response = await axios.get(`${API_URL}?era=${era}`)
       setPlayers(response.data.rows)
       setLoading(false)
     } catch (err) {
@@ -62,7 +67,21 @@ function LeaderboardDraftout() {
     <div className="leaderboard-draftout">
       <div className="leaderboard-container">
         <div className="leaderboard-header">
-          <h1><span className="draftout-title">CLASSEMENT DRAFTOUT</span></h1>
+          <h1 className="draftout-title-row">
+            <button
+              className="season-arrow"
+              onClick={() => era > 1 && navigate(`/draftout?era=${era - 1}`)}
+              disabled={era <= 1}
+              aria-label="Saison précédente"
+            >&lt;</button>
+            <span className="draftout-title">CLASSEMENT DRAFTOUT</span><span className="draftout-season"> S{era}</span>
+            <button
+              className="season-arrow"
+              onClick={() => era < CURRENT_ERA && navigate(`/draftout?era=${era + 1}`)}
+              disabled={era >= CURRENT_ERA}
+              aria-label="Saison suivante"
+            >&gt;</button>
+          </h1>
           <span className="info">Mode de jeu <a href="https://draftoutmc.com/leaderboard?metric=elo" target="_blank" rel="noopener noreferrer">Draftout</a> 26.1</span>
         </div>
 

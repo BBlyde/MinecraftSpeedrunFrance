@@ -40,6 +40,8 @@ export default async function handler(req, res) {
     return
   }
 
+  const era = req.query?.era ?? '2'
+
   try {
     // Récupére la liste des runners MSF
     const leaderboardRes = await fetch('https://back.mcsr-game.com/leaderboard?season=10', {
@@ -66,7 +68,7 @@ export default async function handler(req, res) {
       const batch = allQueries.slice(i, i + CONCURRENCY)
       const batchResults = await Promise.allSettled(
         batch.map(({ key }) =>
-          fetch(`https://draftoutmc.com/api/stats/${key}`, {
+          fetch(`https://draftoutmc.com/api/stats/${key}?era=${era}`, {
             signal: AbortSignal.timeout(5000),
           }).then(r => r.ok ? r.json() : null)
         )

@@ -32,6 +32,43 @@
     animation: textWave 14s linear infinite;
 }
 
+.leaderboard-draftout .draftout-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.leaderboard-draftout .draftout-season {
+    color: #2ec4d6;
+    font-style: italic;
+    -webkit-text-fill-color: #2ec4d6;
+}
+
+.leaderboard-draftout .season-arrow {
+    background: none;
+    border: none;
+    color: #1b7d8a;
+    font-size: 1.4rem;
+    padding: 0.5rem 0.9rem;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    line-height: 1;
+}
+
+.leaderboard-draftout .season-arrow:hover {
+    color: #2ec4d6;
+}
+
+.leaderboard-draftout .season-arrow:disabled {
+    opacity: 0.25;
+    cursor: not-allowed;
+}
+
+.leaderboard-draftout .season-arrow:disabled:hover {
+    color: #1b7d8a;
+}
+
 .leaderboard-draftout .search-input:focus {
     outline: none;
     border-color: #1b7d8a;
