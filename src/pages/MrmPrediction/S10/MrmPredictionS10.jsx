@@ -1429,7 +1429,7 @@ function MrmPredictionS10({ season = 10 }) {
     if (!band) return 'mrm-group-row-result-neutral'
     const delta = distanceToRankBand(rank, band)
     if (delta === 0) return 'mrm-group-row-result-correct'
-    if (delta === 1) return 'mrm-group-row-result-near'
+    if (delta === 1 || delta === 2) return 'mrm-group-row-result-near'
     return 'mrm-group-row-result-wrong'
   }, [])
 
@@ -1540,6 +1540,7 @@ function MrmPredictionS10({ season = 10 }) {
                 <ul className="mrm-prediction-scoring-list">
                   <li>Position exacte: +4</li>
                   <li>Écart d'une place: +2</li>
+                  <li>Écart de deux places: +1</li>
                 </ul>
                 <p className="mrm-prediction-scoring-section">Phase finale</p>
                 <ul className="mrm-prediction-scoring-list">
