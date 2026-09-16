@@ -255,14 +255,14 @@ const LeaderboardRanked = () => {
           <h1 className="ranked-title-row">
             <button
               className="season-arrow"
-              onClick={() => season > 1 && navigate(`/ranked?season=${season - 1}`)}
+              onClick={() => season > 1 && navigate(`/leaderboard/ranked?season=${season - 1}`)}
               disabled={season <= 1}
               aria-label="Saison précédente"
             >&lt;</button>
             <span className="ranked-title">CLASSEMENT RANKED </span><span className="ranked-season">S{season}</span>
             <button
               className="season-arrow"
-              onClick={() => season < CURRENT_SEASON && navigate(`/ranked?season=${season + 1}`)}
+              onClick={() => season < CURRENT_SEASON && navigate(`/leaderboard/ranked?season=${season + 1}`)}
               disabled={season >= CURRENT_SEASON}
               aria-label="Saison suivante"
             >&gt;</button>

@@ -1,7 +1,9 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import './LeaderboardRsg.css'
 import { minecraftHeadUrl } from '../../utils/minecraftHead'
+import { getAdjacentLeaderboardPath } from '../leaderboardCategories'
 
 const SHEET_ID = '1Fgn-assiNCTxiGCUALdRX5i3wRrQHbwE7iSisWynj78'
 const MAIN_SHEET_NAME = 'Leaderboard (sub 15)'
@@ -43,7 +45,9 @@ function parseCSV(csv) {
   const lines = csv.trim().split(/\r?\n/)
   if (lines.length < 2) return []
 
-  const headers = parseCSVLine(lines[0])
+  const headers = parseCSVLine(lines[0]).map((header, index) =>
+    header || (index === 0 ? 'classement' : header),
+  )
   const data = []
 
   for (let i = 1; i < lines.length; i++) {
@@ -61,6 +65,7 @@ function parseCSV(csv) {
 }
 
 function LeaderboardRsg() {
+  const navigate = useNavigate()
   const [players, setPlayers] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -138,13 +143,29 @@ function LeaderboardRsg() {
       ),
     [searchTerm, players],
   )
+  const previousLeaderboardPath = getAdjacentLeaderboardPath('1-16', -1)
+  const nextLeaderboardPath = getAdjacentLeaderboardPath('1-16', 1)
 
   return (
     <div className="leaderboard-rsg">
       <div className="leaderboard-container">
       <div className="leaderboard-header">
-        <h1>CLASSEMENT ANY%</h1>
-        <span className="info">Catégorie RSG 1.16.1</span>
+        <div className="rsg-title-row">
+          <button
+            className="season-arrow"
+            onClick={() => previousLeaderboardPath && navigate(previousLeaderboardPath)}
+            disabled={!previousLeaderboardPath}
+            aria-label="Catégorie précédente"
+          >&lt;</button>
+          <h1>CLASSEMENT 1.16</h1>
+          <button
+            className="season-arrow"
+            onClick={() => nextLeaderboardPath && navigate(nextLeaderboardPath)}
+            disabled={!nextLeaderboardPath}
+            aria-label="Catégorie suivante"
+          >&gt;</button>
+        </div>
+        <span className="info">Catégorie RSG Any% 1.16</span>
       </div>
 
       <div className="section-divider" />

@@ -280,7 +280,7 @@ function MrmS11() {
             <div className="rules-panel-body">
               <div className="rules-row">
                 <i className="bi bi-bar-chart-fill rules-icon" />
-                <span>La qualification aux MRM s'effectue en finissant parmi les 12 plus hauts élos au <Link to="/ranked" className="rules-link">classement Ranked MSF</Link> à la toute fin de la saison de MCSR Ranked</span>
+                <span>La qualification aux MRM s'effectue en finissant parmi les 12 plus hauts élos au <Link to="/leaderboard/ranked" className="rules-link">classement Ranked MSF</Link> à la toute fin de la saison de MCSR Ranked</span>
               </div>
               <div className="rules-row">
                 <i className="bi bi-calendar-check rules-icon" />

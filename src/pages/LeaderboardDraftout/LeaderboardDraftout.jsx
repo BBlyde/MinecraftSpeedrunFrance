@@ -70,14 +70,14 @@ function LeaderboardDraftout() {
           <h1 className="draftout-title-row">
             <button
               className="season-arrow"
-              onClick={() => era > 1 && navigate(`/draftout?era=${era - 1}`)}
+              onClick={() => era > 1 && navigate(`/leaderboard/draftout?era=${era - 1}`)}
               disabled={era <= 1}
               aria-label="Saison précédente"
             >&lt;</button>
             <span className="draftout-title">CLASSEMENT DRAFTOUT</span><span className="draftout-season"> S{era}</span>
             <button
               className="season-arrow"
-              onClick={() => era < CURRENT_ERA && navigate(`/draftout?era=${era + 1}`)}
+              onClick={() => era < CURRENT_ERA && navigate(`/leaderboard/draftout?era=${era + 1}`)}
               disabled={era >= CURRENT_ERA}
               aria-label="Saison suivante"
             >&gt;</button>

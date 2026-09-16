@@ -53,34 +53,38 @@ function Header() {
 
   let headerClass = 'header header-home'
   let leaderboardClass = 'leaderboard-home'
-  let leaderboardLabel = 'HOME'
+  let leaderboardLabel = 'ACCUEIL'
 
   const path = location.pathname.startsWith('/prediction/mrm') ? '/mrm' : location.pathname
   switch (path) {
-    case '/rsg':
+    case '/leaderboard/1-8':
+    case '/leaderboard/1-15':
+    case '/leaderboard/1-16':
+    case '/leaderboard/aa':
+    case '/leaderboard/icarus':
       headerClass = 'header header-rsg'
       leaderboardClass = 'leaderboard-rsg'
-      leaderboardLabel = 'LEADERBOARD'
+      leaderboardLabel = 'CLASSEMENT'
       break
-    case '/ranked':
+    case '/leaderboard/ranked':
       headerClass = 'header header-ranked'
       leaderboardClass = 'leaderboard-ranked'
-      leaderboardLabel = 'LEADERBOARD'
+      leaderboardLabel = 'CLASSEMENT'
       break
     case '/mrm':
       headerClass = 'header header-mrm'
       leaderboardClass = 'leaderboard-ranked'
-      leaderboardLabel = 'TOURNAMENT'
+      leaderboardLabel = 'TOURNOI'
       break
     case '/tournament':
       headerClass = 'header header-tournament'
       leaderboardClass = 'leaderboard-tournament'
-      leaderboardLabel = 'TOURNAMENT'
+      leaderboardLabel = 'TOURNOI'
       break
-    case '/draftout':
+    case '/leaderboard/draftout':
       headerClass = 'header header-draftout'
       leaderboardClass = 'leaderboard-draftout'
-      leaderboardLabel = 'LEADERBOARD'
+      leaderboardLabel = 'CLASSEMENT'
       break
   }
 
@@ -99,9 +103,9 @@ function Header() {
             <li className='nav-classement'>
               <span className='nav-classement-label'>CLASSEMENT<span className='nav-classement-arrow'>▾</span></span>
               <ul className='nav-dropdown'>
-                <li className='nav-rsg'><Link to="/rsg">ANY%</Link></li>
-                <li className='nav-ranked'><Link to="/ranked">RANKED</Link></li>
-                <li className='nav-draftout'><Link to="/draftout">DRAFTOUT</Link></li>
+                <li className='nav-rsg'><Link to="/leaderboard/1-16">RUNS</Link></li>
+                <li className='nav-ranked'><Link to="/leaderboard/ranked">RANKED</Link></li>
+                <li className='nav-draftout'><Link to="/leaderboard/draftout">DRAFTOUT</Link></li>
               </ul>
             </li>
             <li className='nav-tournois'>

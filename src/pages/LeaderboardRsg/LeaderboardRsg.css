@@ -39,6 +39,30 @@
   text-align: center;
 }
 
+.leaderboard-rsg .rsg-title-row {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) 52px;
+  align-items: center;
+  width: min(100%, 550px);
+  margin: 0 auto;
+}
+
+.leaderboard-rsg .season-arrow {
+  background: none;
+  border: none;
+  color: #a10d0d;
+  width: 52px;
+  font-size: 1.4rem;
+  padding: 0.5rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.leaderboard-rsg .season-arrow:disabled {
+  cursor: not-allowed;
+  opacity: 0.25;
+}
+
 .leaderboard-rsg .leaderboard-header h1 {
   font-size: 2.5rem;
   font-weight: 700;

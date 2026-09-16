@@ -8,6 +8,8 @@ import Home from './pages/Home'
 import LeaderboardRsg from './pages/LeaderboardRsg'
 import LeaderboardRanked from './pages/LeaderboardRanked'
 import LeaderboardDraftout from './pages/LeaderboardDraftout'
+import LeaderboardSheet from './pages/LeaderboardSheet'
+import { getLeaderboardCategory } from './pages/leaderboardCategories'
 import Mrm from './pages/Mrm'
 import MrmPrediction from './pages/MrmPrediction'
 import Tournament from './pages/Tournament'
@@ -34,17 +36,21 @@ const SEO_BY_PATH = {
     title: 'Minecraft Speedrun France',
     description: 'Classements Minecraft speedrun France, résultats de tournois MRM et pronostics de la communauté MSF.',
   },
-  '/rsg': {
+  '/leaderboard/1-16': {
     title: 'Classement any%',
     description: 'Consultez le classement Any% Random Seed Glitchless des runners Minecraft Speedrun France.',
   },
-  '/ranked': {
+  '/leaderboard/ranked': {
     title: 'Classement MCSR Ranked',
     description: 'Consultez le classement saisonnier MCSR Ranked des joueurs Minecraft Speedrun France.',
   },
-  '/draftout': {
+  '/leaderboard/draftout': {
     title: 'Classement Draftout',
     description: 'Consultez le classement Draftout et les statistiques des runners de la communauté MSF.',
+  },
+  '/leaderboard/1-15': {
+    title: 'Classement any% 1.15',
+    description: 'Consultez le classement Any% 1.15 des runners Minecraft Speedrun France.',
   },
   '/mrm': {
     title: 'MSF Ranked Masters',
@@ -64,10 +70,19 @@ function Seo() {
   const { pathname } = useLocation()
 
   useEffect(() => {
-    const metadata = SEO_BY_PATH[pathname] ?? {
+    const leaderboardSlug = pathname.startsWith('/leaderboard/')
+      ? pathname.slice('/leaderboard/'.length)
+      : null
+    const leaderboardCategory = leaderboardSlug ? getLeaderboardCategory(leaderboardSlug) : null
+    const metadata = leaderboardCategory
+      ? {
+          title: leaderboardCategory.title.replace('CLASSEMENT ', 'Classement '),
+          description: `Consultez le ${leaderboardCategory.description.toLowerCase()} des runners Minecraft Speedrun France.`,
+        }
+      : SEO_BY_PATH[pathname] ?? {
       title: 'Minecraft Speedrun France',
       description: 'Classements et tournois Minecraft Speedrun France.',
-    }
+      }
     const isAdmin = pathname.startsWith('/admin')
     const canonicalUrl = `https://minecraftspeedrunfrance.fr${pathname}`
 
@@ -101,9 +116,13 @@ function App() {
       <main className="app-main">
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/rsg" element={<LeaderboardRsg />} />
-          <Route path="/ranked" element={<LeaderboardRanked />} />
-          <Route path="/draftout" element={<LeaderboardDraftout />} />
+          <Route path="/leaderboard/1-16" element={<LeaderboardRsg />} />
+          <Route path="/leaderboard/ranked" element={<LeaderboardRanked />} />
+          <Route path="/leaderboard/draftout" element={<LeaderboardDraftout />} />
+          <Route path="/leaderboard/:sheetName" element={<LeaderboardSheet />} />
+          <Route path="/rsg" element={<Navigate to="/leaderboard/1-16" replace />} />
+          <Route path="/ranked" element={<Navigate to="/leaderboard/ranked" replace />} />
+          <Route path="/draftout" element={<Navigate to="/leaderboard/draftout" replace />} />
           <Route path="/mrm" element={<Mrm />} />
           <Route path="/prediction/mrm/:discordId" element={<MrmPrediction />} />
           <Route path="/prediction/mrm" element={<MrmPrediction />} />
