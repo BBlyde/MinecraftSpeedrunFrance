@@ -16,6 +16,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { withLcqDropWorst } from '../../utils/lcqScoring'
 
 export const DEFAULT_HEAD = 'https://mc-heads.net/avatar/0385/64'
 
@@ -205,7 +206,9 @@ export function normalizeGroupPlayer(row, seedCount = 6) {
 
 export function normalizeGroupFromApi(apiRows, seedCount = 6) {
   if (!Array.isArray(apiRows)) return []
-  return apiRows.map((row) => normalizeGroupPlayer(row, seedCount)).filter(Boolean)
+  const players = apiRows.map((row) => normalizeGroupPlayer(row, seedCount)).filter(Boolean)
+  if (seedCount !== 8) return players
+  return withLcqDropWorst(players, seedCount)
 }
 
 export function placeholderPlayers(count, seedCount = 8) {
@@ -534,7 +537,12 @@ export function SortableGroupTable({
                         {p?.name || 'TBD'}
                       </td>
                       {Array.from({ length: seedCount }, (_, i) => (
-                        <td key={i}>{formatScore(p?.[`s${i + 1}`] ?? 0)}</td>
+                        <td
+                          key={i}
+                          className={p?.droppedSeed === i ? 'is-dropped' : undefined}
+                        >
+                          {formatScore(p?.[`s${i + 1}`] ?? 0)}
+                        </td>
                       ))}
                       <td className="col-pts">{formatScore(p?.total ?? 0)}</td>
                     </SortableGroupRow>

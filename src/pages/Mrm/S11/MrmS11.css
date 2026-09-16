@@ -538,6 +538,11 @@
     font-weight: 700;
 }
 
+.group-table td.is-dropped {
+    text-decoration: line-through;
+    opacity: 0.4;
+}
+
 .group-table tbody tr.row-qualify td {
     color: #ffffff;
 }

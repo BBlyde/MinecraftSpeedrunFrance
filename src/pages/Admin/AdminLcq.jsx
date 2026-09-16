@@ -84,7 +84,6 @@ function AdminLcq() {
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState(null)
   const [error, setError] = useState(null)
-  const [dropWorst, setDropWorst] = useState(false)
 
   const eventPath = `/api/lcq-mrm/event/${encodeURIComponent(eventId.trim())}`
 
@@ -206,9 +205,10 @@ function AdminLcq() {
     matchId: matchIds[seed - 1] ?? null,
   }))
   const displayRows = useMemo(
-    () => buildDisplayRows(players, seedColumns, dropWorst),
-    [players, matchIds, dropWorst],
+    () => buildDisplayRows(players, seedColumns, matchIds.filter((id) => id != null).length >= SEED_COUNT),
+    [players, matchIds],
   )
+  const dropWorst = matchIds.filter((id) => id != null).length >= SEED_COUNT
 
   return (
     <div className="admin-lcq">
@@ -253,14 +253,9 @@ function AdminLcq() {
           <div className="admin-lcq-title">
             <span>Event {scoreboard.eventId}</span>
             <div className="admin-lcq-title-actions">
-              <label className="admin-lcq-drop-toggle">
-                <input
-                  type="checkbox"
-                  checked={dropWorst}
-                  onChange={(e) => setDropWorst(e.target.checked)}
-                />
-                Enlever le pire seed
-              </label>
+              {dropWorst ? (
+                <span className="admin-lcq-title-info">Pire seed retirée</span>
+              ) : null}
               <span className="admin-lcq-title-info">
                 {matchIds.length}/{SEED_COUNT} seed(s)
               </span>

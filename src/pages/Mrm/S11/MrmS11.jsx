@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react'
 import './MrmS11.css'
 import { Link } from 'react-router-dom'
 import { TOURNAMENT_WS_URL, usePersistentWebSocket } from '../../../utils/usePersistentWebSocket'
+import { lcqEightSeedsEntered, lcqTotalFromSeeds, lcqWorstSeedIndex, LCQ_SEED_COUNT } from '../../../utils/lcqScoring'
 
 const BRACKET_PLACEHOLDER_UUID = '0385'
-const LCQ_SEED_COUNT = 8
 const LCQ_QUALIFY = 4
 
 function formatLcqDelta(value) {
@@ -42,7 +42,13 @@ function normalizeLcqPlayer(row) {
 
 function normalizeLcqFromApi(apiRows) {
   if (!Array.isArray(apiRows)) return []
-  return apiRows.map(normalizeLcqPlayer).filter(Boolean)
+  const players = apiRows.map(normalizeLcqPlayer).filter(Boolean)
+  const dropWorst = lcqEightSeedsEntered(players)
+  return players.map((player) => ({
+    ...player,
+    total: lcqTotalFromSeeds(player, { dropWorst }),
+    droppedSeed: dropWorst ? lcqWorstSeedIndex(player) : null,
+  }))
 }
 
 function applyLcqFromTournament(data, setLcqPlayers) {
@@ -260,7 +266,13 @@ function MrmS11() {
                           {player.name}
                         </td>
                         {Array.from({ length: LCQ_SEED_COUNT }, (_, seed) => (
-                          <td key={seed}>{formatLcqDelta(player[`s${seed + 1}`])}</td>
+                          <td
+                            key={seed}
+                            className={player.droppedSeed === seed ? 'is-dropped' : undefined}
+                            title={player.droppedSeed === seed ? 'Pire seed ignorée' : undefined}
+                          >
+                            {formatLcqDelta(player[`s${seed + 1}`])}
+                          </td>
                         ))}
                         <td className="col-pts">{formatLcqDelta(player.total)}</td>
                       </tr>
@@ -298,7 +310,7 @@ function MrmS11() {
               </div>
               <div className="rules-row">
                 <i className="bi bi-stopwatch rules-icon" />
-                <span>Dans un format de <span className="rules-highlight">8 seeds</span>, le <span className="rules-highlight">delta</span> du temps final de chacun sera accumulé à partir du premier à terminer la seed et avec un délai maximum de <span className="rules-highlight">5 minutes</span> pour compléter la seed</span>
+                <span>Dans un format de <span className="rules-highlight">8 seeds</span>, le <span className="rules-highlight">delta</span> du temps final de chacun sera accumulé à partir du premier à terminer la seed, avec un délai maximum de <span className="rules-highlight">5 minutes</span> pour compléter la seed. Une fois les 8 seeds jouées, la <span className="rules-highlight">pire seed</span> de chaque runner est retirée du total</span>
               </div>
               <div className="rules-row">
                 <i className="bi bi-people-fill rules-icon" />
