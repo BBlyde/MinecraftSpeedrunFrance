@@ -581,7 +581,7 @@
 .mrm-container.mrm-prediction .group-table td.col-rank,
 .mrm-container.mrm-prediction .group-table th.col-player,
 .mrm-container.mrm-prediction .group-table td.col-player {
-    z-index: 2;
+    z-index: 3;
 }
 
 .mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.row-qualify td.col-rank,
@@ -615,14 +615,18 @@
 
 .mrm-container.mrm-prediction .group-table tbody tr:hover td,
 .mrm-container.mrm-prediction .group-table tbody tr.row-qualify:hover td,
-.mrm-container.mrm-prediction .group-table tbody tr:hover td.col-rank,
-.mrm-container.mrm-prediction .group-table tbody tr:hover td.col-player,
-.mrm-container.mrm-prediction .group-table tbody tr.row-qualify:hover td.col-rank,
-.mrm-container.mrm-prediction .group-table tbody tr.row-qualify:hover td.col-player,
 .mrm-container.mrm-prediction .group-table tbody tr.mrm-group-row-result-correct:hover td,
 .mrm-container.mrm-prediction .group-table tbody tr.mrm-group-row-result-near:hover td,
 .mrm-container.mrm-prediction .group-table tbody tr.mrm-group-row-result-wrong:hover td {
     background: rgba(75, 75, 75, 0.2);
+}
+
+.mrm-container.mrm-prediction .group-table tbody tr:hover td.col-rank,
+.mrm-container.mrm-prediction .group-table tbody tr:hover td.col-player,
+.mrm-container.mrm-prediction .group-table tbody tr.row-qualify:hover td.col-rank,
+.mrm-container.mrm-prediction .group-table tbody tr.row-qualify:hover td.col-player {
+    background-color: #161b22;
+    background-image: linear-gradient(rgba(75, 75, 75, 0.35), rgba(75, 75, 75, 0.35));
 }
 
 .mrm-sortable-row {
