@@ -12,10 +12,12 @@
 
 .mrm-container.mrm-prediction > .mrm-s11,
 .mrm-prediction-season,
-.mrm-container.mrm-prediction .mrm-prediction-content-wrap {
+.mrm-container.mrm-prediction .mrm-prediction-content-wrap,
+.mrm-container.mrm-prediction .mrm-groups {
     width: 100%;
     max-width: 100%;
     min-width: 0;
+    overflow: visible;
 }
 
 @media (min-width: 991px) {
@@ -571,23 +573,26 @@
 
 .mrm-container.mrm-prediction .group-table-lcq.group-table--community-share {
     --lcq-share-col: 3.35rem;
-    max-width: calc(900px + var(--lcq-share-col));
+    max-width: 900px;
     background: transparent;
     border: none;
     overflow: visible;
 }
 
 .mrm-container.mrm-prediction .group-table-lcq.group-table--community-share .group-table-lcq-layout {
-    display: flex;
-    align-items: stretch;
+    position: relative;
 }
 
 .mrm-container.mrm-prediction .group-table-lcq.group-table--community-share .mrm-lcq-community-rail {
+    position: absolute;
+    left: calc(-1 * var(--lcq-share-col));
+    top: 0;
+    bottom: 0;
     display: flex;
     flex-direction: column;
-    flex-shrink: 0;
     width: var(--lcq-share-col);
     box-sizing: border-box;
+    pointer-events: none;
 }
 
 .mrm-container.mrm-prediction .group-table-lcq.group-table--community-share .mrm-lcq-community-rail-head {
@@ -609,8 +614,12 @@
     box-sizing: border-box;
 }
 
+.mrm-container.mrm-prediction .group-table-lcq.group-table--community-share .mrm-lcq-community-pct {
+    pointer-events: auto;
+}
+
 .mrm-container.mrm-prediction .group-table-lcq.group-table--community-share .group-table-scroll {
-    flex: 1;
+    width: 100%;
     min-width: 0;
     background: #161b22;
     border: 1px solid #2e2e2e;
@@ -621,8 +630,8 @@
 }
 
 .mrm-container.mrm-prediction .group-table-lcq.group-table--community-share .group-title {
-    margin-left: var(--lcq-share-col);
-    width: calc(100% - var(--lcq-share-col));
+    width: 100%;
+    margin-left: 0;
     border: 1px solid #2e2e2e;
     border-bottom: none;
     border-radius: 8px 8px 0 0;
