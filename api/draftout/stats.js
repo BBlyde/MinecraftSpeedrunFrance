@@ -32,6 +32,7 @@ const DRAFTOUT_WHITELIST = [
   '30a83701-c763-4fcf-aaa5-e9c0ce0fa46e', // Scranox
   '658de3c4-4bae-4743-ba8c-2ea36fadc183', // Nyhru
   'a3f61384-2986-4aef-b9ec-5fc799a0fa88', // SuneeToo
+  '290850ef-d046-4d6e-9656-f0490e49cb4b', // SlimiChan
 ]
 
 export default async function handler(req, res) {
