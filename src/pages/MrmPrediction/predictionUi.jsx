@@ -17,6 +17,7 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { withLcqDropWorst } from '../../utils/lcqScoring'
+import { communityShareColor, formatCommunityShareLabel } from '../../utils/lcqCommunityStats'
 
 export const DEFAULT_HEAD = 'https://mc-heads.net/avatar/0385/64'
 
@@ -420,6 +421,19 @@ export function pidFromSlot(slot, fallbackPid, playerMap) {
   return pidFromPlayerIdentity(playerMap, slot.id, slot.name) ?? fallbackPid ?? null
 }
 
+function restrictDragToTable({ transform, draggingNodeRect, containerNodeRect }) {
+  const next = { ...transform, x: 0 }
+  if (!draggingNodeRect || !containerNodeRect) return next
+
+  if (draggingNodeRect.top + next.y <= containerNodeRect.top) {
+    next.y = containerNodeRect.top - draggingNodeRect.top
+  } else if (draggingNodeRect.bottom + next.y >= containerNodeRect.bottom) {
+    next.y = containerNodeRect.bottom - draggingNodeRect.bottom
+  }
+
+  return next
+}
+
 export function resolveOfficialWinnerPid(rawWinner, pairIds, playerMap, bracketSlots, index0, index1, maxWins) {
   const fromField = resolveWinnerPid(rawWinner, pairIds, playerMap)
   if (fromField) return fromField
@@ -437,7 +451,7 @@ function SortableGroupRow({ id, qualify, dragDisabled, resultClass = '', childre
     disabled: dragDisabled,
   })
   const style = {
-    transform: CSS.Transform.toString(transform),
+    transform: CSS.Transform.toString(transform ? { ...transform, x: 0 } : null),
     transition,
   }
   const rowClass = [
@@ -471,6 +485,7 @@ export function SortableGroupTable({
   interactionsEnabled,
   isLocked = false,
   getRowResultClass = null,
+  getCommunityShare = null,
   seedCount = 6,
   qualifyCount = 2,
   tableClassName = '',
@@ -498,12 +513,52 @@ export function SortableGroupTable({
     [onOrderChange, order, sortableIds],
   )
 
+  const showCommunityShare = typeof getCommunityShare === 'function'
+
   return (
-    <div className={`group-table group-table-${groupNum} ${tableClassName} ${isLocked ? 'mrm-group-table--locked' : ''}`.trim()}>
+    <div
+      className={`group-table group-table-${groupNum} ${tableClassName} ${
+        showCommunityShare ? 'group-table--community-share' : ''
+      } ${isLocked ? 'mrm-group-table--locked' : ''}`.trim()}
+    >
       {groupTitle ? <div className={`group-title ${titleClassName}`}>{groupTitle}</div> : null}
+      <div className="group-table-lcq-layout">
+        {showCommunityShare ? (
+          <div className="mrm-lcq-community-rail" aria-label="Part des pronostiques par rang">
+            <div className="mrm-lcq-community-rail-head" aria-hidden="true">
+              %
+            </div>
+            {order.map((baselineIdx, rank) => {
+              const p = baseline[baselineIdx]
+              const share = getCommunityShare(baselineIdx, rank, p)
+              const shareLabel = formatCommunityShareLabel(share)
+              return (
+                <div key={`share-${rank}`} className="mrm-lcq-community-rail-item">
+                  {shareLabel ? (
+                    <span
+                      className="mrm-lcq-community-pct"
+                      style={{ color: communityShareColor(share) }}
+                    >
+                      {shareLabel}
+                      <span className="mrm-lcq-community-tip" role="tooltip">
+                        Pourcentage de pronostiques qui placent ce runner à ce rang.
+                      </span>
+                    </span>
+                  ) : null}
+                </div>
+              )
+            })}
+          </div>
+        ) : null}
       <div className="group-table-scroll">
         <div className="group-table-scroll-inner">
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          modifiers={[restrictDragToTable]}
+          autoScroll={false}
+          onDragEnd={onDragEnd}
+        >
           <table>
             <thead>
               <tr>
@@ -553,6 +608,7 @@ export function SortableGroupTable({
           </table>
         </DndContext>
         </div>
+      </div>
       </div>
     </div>
   )

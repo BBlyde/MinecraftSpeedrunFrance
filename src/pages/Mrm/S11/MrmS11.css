@@ -454,6 +454,7 @@
 .group-table tbody tr {
     border-bottom: 1px solid #222;
     transition: background-color 0.15s ease;
+    isolation: isolate;
 }
 
 .group-table tbody tr:hover,
@@ -464,6 +465,12 @@
 .group-table tbody tr:hover td,
 .group-table tbody tr.row-qualify:hover td {
     background: rgba(75, 75, 75, 0.2);
+}
+
+.group-table tbody tr:hover td.col-rank,
+.group-table tbody tr:hover td.col-player {
+    background-color: #161b22;
+    background-image: linear-gradient(rgba(75, 75, 75, 0.35), rgba(75, 75, 75, 0.35));
 }
 
 .group-table tbody tr:last-child {
@@ -506,8 +513,8 @@
 }
 
 .group-table td:not(.col-rank):not(.col-player) {
-    position: relative;
-    z-index: 0;
+    position: static;
+    z-index: auto;
 }
 
 .group-table th.col-rank,

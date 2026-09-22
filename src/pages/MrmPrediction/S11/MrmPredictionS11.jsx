@@ -6,6 +6,7 @@ import { reconcileOrder } from '../../Mrm/mrmPredictionStorage'
 import MrmPronosLeaderboard from '../../Mrm/MrmPronosLeaderboard'
 import { discordAvatarUrl, discordDisplayName } from '../../../utils/discordUser'
 import { predictionApiUrl } from '../../../utils/predictionApi'
+import { communityShareForRank, fetchLcqCommunityRankCounts, localDemoCommunityStats } from '../../../utils/lcqCommunityStats'
 import { predictionEventForSeason, predictionPagePath } from '../predictionSeason'
 import PredictionAuthBanner from '../PredictionAuthBanner'
 import {
@@ -133,6 +134,7 @@ function MrmPredictionS11({ season = 11 }) {
   const [lockInfo, setLockInfo] = useState(DEFAULT_LOCK_STATE)
   const [finishedInfo, setFinishedInfo] = useState(DEFAULT_FINISHED_STATE)
   const [officialInfo, setOfficialInfo] = useState(null)
+  const [lcqCommunityStats, setLcqCommunityStats] = useState(null)
 
   const baselinePredictionPayloadRef = useRef(null)
   const captureBaselineAfterHydrateRef = useRef(false)
@@ -405,7 +407,7 @@ function MrmPredictionS11({ season = 11 }) {
         const predictionFetchUrl = readOnly
           ? predictionApiUrl(`prediction/${eventId}/users/${encodeURIComponent(viewDiscordId)}`)
           : predictionUrl
-        const res = await fetch(predictionFetchUrl, readOnly ? undefined : { credentials: 'include' })
+        const res = await fetch(predictionFetchUrl, { credentials: 'include' })
         const data = await res.json().catch(() => ({}))
         if (readOnly && res.status === 404) {
           if (!cancelled) {
@@ -483,6 +485,25 @@ function MrmPredictionS11({ season = 11 }) {
       cancelled = true
     }
   }, [authChecked, groupsLoaded, discordUser, lcq, tournamentBracket, readOnly, viewDiscordId, eventId, predictionUrl])
+
+  useEffect(() => {
+    if (!groupsLoaded || lcq.length === 0) return
+    let cancelled = false
+    ;(async () => {
+      try {
+        const stats = await fetchLcqCommunityRankCounts(eventId, lcq.length)
+        const usable = stats.total >= 2 ? stats : import.meta.env.DEV
+          ? localDemoCommunityStats(lcq.length)
+          : { total: 0, counts: [] }
+        if (!cancelled) setLcqCommunityStats(usable)
+      } catch {
+        if (!cancelled) setLcqCommunityStats({ total: 0, counts: [] })
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [groupsLoaded, eventId, lcq.length])
 
   const resetScoreIfPairChanged = useCallback((key, pairKey, reset) => {
     const prev = matchPairKeysRef.current[key]
@@ -650,6 +671,11 @@ function MrmPredictionS11({ season = 11 }) {
     if (delta === 1 || delta === 2) return 'mrm-group-row-result-near'
     return 'mrm-group-row-result-wrong'
   }, [])
+
+  const getLcqCommunityShare = useCallback(
+    (baselineIdx, rank) => communityShareForRank(lcqCommunityStats, baselineIdx, rank),
+    [lcqCommunityStats],
+  )
 
   const bracketResultClass = useCallback((pid, pickedWinner, officialWinner, enabled) => {
     if (!enabled || pid == null) return ''
@@ -1092,6 +1118,7 @@ function MrmPredictionS11({ season = 11 }) {
                 qualifyCount={LCQ_QUALIFY}
                 tableClassName="group-table-lcq"
                 scoreDisplay="delta"
+                getCommunityShare={getLcqCommunityShare}
                 getRowResultClass={(baselineIdx, rank) =>
                   groupRowResultClass(baselineIdx, rank, officialLcqBands, lcqScored)}
               />
