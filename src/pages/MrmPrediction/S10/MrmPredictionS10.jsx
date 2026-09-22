@@ -443,13 +443,26 @@ function formatLockDateLabel(lockAt) {
   }
 }
 
+function restrictDragToTable({ transform, draggingNodeRect, containerNodeRect }) {
+  const next = { ...transform, x: 0 }
+  if (!draggingNodeRect || !containerNodeRect) return next
+
+  if (draggingNodeRect.top + next.y <= containerNodeRect.top) {
+    next.y = containerNodeRect.top - draggingNodeRect.top
+  } else if (draggingNodeRect.bottom + next.y >= containerNodeRect.bottom) {
+    next.y = containerNodeRect.bottom - draggingNodeRect.bottom
+  }
+
+  return next
+}
+
 function SortableGroupRow({ id, qualify, dragDisabled, resultClass = '', children }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id,
     disabled: dragDisabled,
   })
   const style = {
-    transform: CSS.Transform.toString(transform),
+    transform: CSS.Transform.toString(transform ? { ...transform, x: 0 } : null),
     transition,
   }
   const rowClass = [
@@ -509,7 +522,13 @@ function SortableGroupTable({
     <div className={`group-table group-table-${groupNum} ${isLocked ? 'mrm-group-table--locked' : ''}`}>
       <div className="group-table-scroll">
         <div className={`group-title ${titleClassName}`}>{groupTitle}</div>
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          modifiers={[restrictDragToTable]}
+          autoScroll={false}
+          onDragEnd={onDragEnd}
+        >
           <table>
             <thead>
               <tr>
