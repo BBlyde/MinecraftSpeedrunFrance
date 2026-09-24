@@ -421,6 +421,19 @@ export function pidFromSlot(slot, fallbackPid, playerMap) {
   return pidFromPlayerIdentity(playerMap, slot.id, slot.name) ?? fallbackPid ?? null
 }
 
+function CommunityShareLabel({ share, className = '' }) {
+  const shareLabel = formatCommunityShareLabel(share)
+  if (!shareLabel) return null
+  return (
+    <span className={`mrm-lcq-community-pct ${className}`.trim()} style={{ color: communityShareColor(share) }}>
+      {shareLabel}
+      <span className="mrm-lcq-community-tip" role="tooltip">
+        Pourcentage de pronostiques qui placent ce runner à ce rang.
+      </span>
+    </span>
+  )
+}
+
 function restrictDragToTable({ transform, draggingNodeRect, containerNodeRect }) {
   const next = { ...transform, x: 0 }
   if (!draggingNodeRect || !containerNodeRect) return next
@@ -531,20 +544,9 @@ export function SortableGroupTable({
             {order.map((baselineIdx, rank) => {
               const p = baseline[baselineIdx]
               const share = getCommunityShare(baselineIdx, rank, p)
-              const shareLabel = formatCommunityShareLabel(share)
               return (
                 <div key={`share-${rank}`} className="mrm-lcq-community-rail-item">
-                  {shareLabel ? (
-                    <span
-                      className="mrm-lcq-community-pct"
-                      style={{ color: communityShareColor(share) }}
-                    >
-                      {shareLabel}
-                      <span className="mrm-lcq-community-tip" role="tooltip">
-                        Pourcentage de pronostiques qui placent ce runner à ce rang.
-                      </span>
-                    </span>
-                  ) : null}
+                  <CommunityShareLabel share={share} />
                 </div>
               )
             })}
@@ -590,6 +592,12 @@ export function SortableGroupTable({
                         <img src={mcHeadUrl(p?.uuid)} alt="" className="player-head" />
                         &nbsp; &nbsp;
                         {p?.name || 'TBD'}
+                        {showCommunityShare ? (
+                          <CommunityShareLabel
+                            share={getCommunityShare(baselineIdx, rank, p)}
+                            className="mrm-lcq-community-pct--inline"
+                          />
+                        ) : null}
                       </td>
                       {Array.from({ length: seedCount }, (_, i) => (
                         <td

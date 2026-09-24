@@ -70,6 +70,71 @@
     margin-bottom: 1.25rem;
 }
 
+.mrm-prediction-info-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.25rem;
+    background: rgba(8, 10, 14, 0.78);
+    backdrop-filter: blur(3px);
+}
+
+.mrm-prediction-info-modal-card {
+    width: min(28rem, calc(100vw - 2.5rem));
+    max-width: calc(100vw - 2.5rem);
+    min-width: 0;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1.25rem;
+    padding: 1.6rem 1.4rem 1.35rem;
+    text-align: center;
+    color: #fff8e8;
+    background: #1c2128;
+    border: 2px solid #86CE34;
+    border-radius: 0;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.5);
+    font-family: 'Poppins', sans-serif;
+}
+
+.mrm-prediction-info-modal-card p {
+    display: block;
+    margin: 0;
+    min-width: 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+    line-height: 1.5;
+    letter-spacing: 0;
+    text-transform: none;
+    text-align: center;
+    white-space: normal;
+    overflow-wrap: break-word;
+}
+
+.mrm-prediction-info-modal-close {
+    align-self: center;
+    border: none;
+    background: #86CE34;
+    color: #102C30;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    border-radius: 8px;
+    padding: 0.6rem 1.5rem;
+    cursor: pointer;
+}
+
+.mrm-prediction-info-modal-close:hover,
+.mrm-prediction-info-modal-close:focus-visible {
+    background: #a8e05a;
+    outline: none;
+}
+
 .mrm-prediction-view-banner-main {
     display: flex;
     align-items: center;
@@ -853,6 +918,13 @@
     opacity: 1;
 }
 
+.mrm-container.mrm-prediction .mrm-lcq-community-pct--inline {
+    display: none;
+    margin-left: 0.45rem;
+    min-width: 0;
+    vertical-align: middle;
+}
+
 @media (max-width: 990px) {
     .mrm-prediction-auth-banner,
     .mrm-prediction-view-banner {
@@ -921,6 +993,27 @@
 
     .mrm-container.mrm-prediction .group-table-lcq table {
         min-width: 720px;
+    }
+
+    .mrm-container.mrm-prediction .group-table-lcq.group-table--community-share .mrm-lcq-community-rail {
+        display: none;
+    }
+
+    .mrm-container.mrm-prediction .mrm-lcq-community-pct--inline {
+        display: inline-block;
+        font-size: 0.72rem;
+    }
+
+    .mrm-container.mrm-prediction .mrm-lcq-community-pct--inline .mrm-lcq-community-tip {
+        left: auto;
+        right: 0;
+        transform: none;
+    }
+
+    .mrm-container.mrm-prediction .mrm-lcq-community-pct--inline .mrm-lcq-community-tip::after {
+        left: auto;
+        right: 0.7rem;
+        margin-left: 0;
     }
 }
 

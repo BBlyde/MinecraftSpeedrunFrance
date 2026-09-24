@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import '../MrmPrediction.css'
 import '../../Mrm/S11/MrmS11.css'
@@ -42,6 +43,31 @@ const R16_COUNT = 8
 const QF_COUNT = 4
 const BO3 = 2
 const BO5 = 3
+const LEIKY_LCQ_NOTICE_KEY = 'mrm-s11-leiky-left-lcq'
+
+/** Ids already shown this page load. Survives StrictMode remounts so the notice still appears once. */
+const leikyNoticeShownIds = new Set()
+const leikyNoticeDismissedIds = new Set()
+
+function leikyNoticeStorageKey(discordId) {
+  return `${LEIKY_LCQ_NOTICE_KEY}:${discordId}`
+}
+
+function hasSeenLeikyLcqNotice(discordId) {
+  try {
+    return localStorage.getItem(leikyNoticeStorageKey(discordId)) === '1'
+  } catch {
+    return false
+  }
+}
+
+function markLeikyLcqNoticeSeen(discordId) {
+  try {
+    localStorage.setItem(leikyNoticeStorageKey(discordId), '1')
+  } catch {
+    /* private mode or blocked storage */
+  }
+}
 
 function homePath(season) {
   return predictionPagePath(season)
@@ -135,6 +161,8 @@ function MrmPredictionS11({ season = 11 }) {
   const [finishedInfo, setFinishedInfo] = useState(DEFAULT_FINISHED_STATE)
   const [officialInfo, setOfficialInfo] = useState(null)
   const [lcqCommunityStats, setLcqCommunityStats] = useState(null)
+  const [hasSavedPrediction, setHasSavedPrediction] = useState(false)
+  const [leikyNoticeOpen, setLeikyNoticeOpen] = useState(false)
 
   const baselinePredictionPayloadRef = useRef(null)
   const captureBaselineAfterHydrateRef = useRef(false)
@@ -398,6 +426,7 @@ function MrmPredictionS11({ season = 11 }) {
       setViewLoadError(null)
       setViewProfile(null)
       setViewHasPrediction(false)
+      setHasSavedPrediction(false)
     }
 
     let cancelled = false
@@ -443,6 +472,7 @@ function MrmPredictionS11({ season = 11 }) {
             : null
         if (cancelled) return
         if (readOnly) setViewHasPrediction(pred != null)
+        else setHasSavedPrediction(pred != null)
 
         if (pred) {
           setOrder1(reconcileOrder(lcq.length, pred.order1))
@@ -504,6 +534,44 @@ function MrmPredictionS11({ season = 11 }) {
       cancelled = true
     }
   }, [groupsLoaded, eventId, lcq.length])
+
+  useEffect(() => {
+    if (readOnly || !hydrated || !hasSavedPrediction || !discordUser?.id) return
+    const id = String(discordUser.id)
+    if (leikyNoticeDismissedIds.has(id)) return
+    if (hasSeenLeikyLcqNotice(id) && !leikyNoticeShownIds.has(id)) return
+    leikyNoticeShownIds.add(id)
+    setLeikyNoticeOpen(true)
+  }, [readOnly, hydrated, hasSavedPrediction, discordUser])
+
+  const leikyNoticeButtonRef = useRef(null)
+
+  useEffect(() => {
+    if (!leikyNoticeOpen) return undefined
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    leikyNoticeButtonRef.current?.focus()
+    const blockEscape = (event) => {
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        event.stopPropagation()
+      }
+    }
+    document.addEventListener('keydown', blockEscape, true)
+    return () => {
+      document.body.style.overflow = previousOverflow
+      document.removeEventListener('keydown', blockEscape, true)
+    }
+  }, [leikyNoticeOpen])
+
+  const dismissLeikyNotice = useCallback(() => {
+    if (discordUser?.id) {
+      const id = String(discordUser.id)
+      leikyNoticeDismissedIds.add(id)
+      markLeikyLcqNoticeSeen(id)
+    }
+    setLeikyNoticeOpen(false)
+  }, [discordUser])
 
   const resetScoreIfPairChanged = useCallback((key, pairKey, reset) => {
     const prev = matchPairKeysRef.current[key]
@@ -813,6 +881,31 @@ function MrmPredictionS11({ season = 11 }) {
       ) : null}
 
       <PredictionAuthBanner visible={authChecked && !discordUser && !readOnly} />
+      {leikyNoticeOpen
+        ? createPortal(
+            <div className="mrm-prediction-info-modal">
+              <div
+                className="mrm-prediction-info-modal-card"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="leiky-lcq-notice-title"
+              >
+                <p id="leiky-lcq-notice-title">
+                  ⚠️ Leiky ne participe plus au LCQ. Tes choix ont été modifiés donc pense bien à vérifier tes pronostiques.
+                </p>
+                <button
+                  ref={leikyNoticeButtonRef}
+                  type="button"
+                  className="mrm-prediction-info-modal-close"
+                  onClick={dismissLeikyNotice}
+                >
+                  Compris
+                </button>
+              </div>
+            </div>,
+            document.body,
+          )
+        : null}
       {isGlobalLocked ? (
         <div className="mrm-prediction-auth-banner mrm-prediction-auth-banner--locks" role="status">
           <span>

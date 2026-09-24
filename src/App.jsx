@@ -34,7 +34,7 @@ function ScrollToTop() {
 const SEO_BY_PATH = {
   '/': {
     title: 'Minecraft Speedrun France',
-    description: 'Classements Minecraft speedrun France, résultats de tournois MRM et pronostics de la communauté MSF.',
+    description: 'Classements Minecraft speedrun France, résultats de tournois MRM et pronostiques de la communauté MSF.',
   },
   '/leaderboard/1-16': {
     title: 'Classement any%',
@@ -57,8 +57,8 @@ const SEO_BY_PATH = {
     description: 'Suivez les groupes, scores et résultats des tournois MRM de Minecraft Speedrun France.',
   },
   '/prediction/mrm': {
-    title: 'Pronostics MRM',
-    description: 'Faites vos pronostics et consultez le classement de la communauté pour les tournois MRM.',
+    title: 'Pronostiques MRM',
+    description: 'Faites vos pronostiques et consultez le classement de la communauté pour les tournois MRM.',
   },
   '/tournament': {
     title: 'Archives des tournois',
