@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import '../MrmPrediction.css'
 import '../../Mrm/S11/MrmS11.css'
-import { reconcileOrder } from '../../Mrm/mrmPredictionStorage'
+import { reconcileLcqOrder } from '../../Mrm/mrmPredictionStorage'
 import MrmPronosLeaderboard from '../../Mrm/MrmPronosLeaderboard'
 import { discordAvatarUrl, discordDisplayName } from '../../../utils/discordUser'
 import { predictionApiUrl } from '../../../utils/predictionApi'
@@ -340,6 +340,7 @@ function MrmPredictionS11({ season = 11 }) {
   const predictionStateRef = useRef({})
   predictionStateRef.current = {
     order1,
+    lcqNames: lcq.map((player) => (typeof player?.name === 'string' ? player.name.trim() : '')),
     round16Scores,
     quarterScores,
     semi1Score,
@@ -475,7 +476,12 @@ function MrmPredictionS11({ season = 11 }) {
         else setHasSavedPrediction(pred != null)
 
         if (pred) {
-          setOrder1(reconcileOrder(lcq.length, pred.order1))
+          const savedOrder = Array.isArray(pred.order1) && pred.order1.some((value) => typeof value === 'string')
+            ? pred.order1
+            : Array.isArray(pred.order1Names) && pred.order1Names.length > 0
+              ? pred.order1Names
+              : pred.order1
+          setOrder1(reconcileLcqOrder(lcq, savedOrder))
           setRound16Scores(parseSavedScorePairs(pred.round16Scores, R16_COUNT, BO3))
           setQuarterScores(parseSavedScorePairs(pred.quarterScores, QF_COUNT, BO3))
           setSemi1Score(parseSavedPairScore(pred.semi1Score, BO5) ?? [0, 0])
@@ -521,7 +527,7 @@ function MrmPredictionS11({ season = 11 }) {
     let cancelled = false
     ;(async () => {
       try {
-        const stats = await fetchLcqCommunityRankCounts(eventId, lcq.length)
+        const stats = await fetchLcqCommunityRankCounts(eventId, lcq)
         const usable = stats.total >= 2 ? stats : import.meta.env.DEV
           ? localDemoCommunityStats(lcq.length)
           : { total: 0, counts: [] }
@@ -533,7 +539,7 @@ function MrmPredictionS11({ season = 11 }) {
     return () => {
       cancelled = true
     }
-  }, [groupsLoaded, eventId, lcq.length])
+  }, [groupsLoaded, eventId, lcq])
 
   useEffect(() => {
     if (readOnly || !hydrated || !hasSavedPrediction || !discordUser?.id) return
@@ -626,7 +632,9 @@ function MrmPredictionS11({ season = 11 }) {
   const buildPayload = useCallback(() => {
     const s = predictionStateRef.current
     return {
-      order1: s.order1,
+      order1: (s.order1 ?? [])
+        .map((index) => s.lcqNames?.[index] ?? '')
+        .filter((name) => name !== ''),
       round16Scores: s.round16Scores,
       quarterScores: s.quarterScores,
       semi1Score: s.semi1Score,

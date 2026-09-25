@@ -1,14 +1,15 @@
-import { reconcileOrder } from '../pages/Mrm/mrmPredictionStorage'
+import { reconcileLcqOrder } from '../pages/Mrm/mrmPredictionStorage'
 import { predictionApiUrl } from './predictionApi'
 
 /**
  * Compte, pour chaque joueur LCQ (index baseline), combien de pronos le placent à chaque rang.
  * @param {string} eventId
- * @param {number} size
+ * @param {{ name?: string }[]} players
  * @returns {Promise<{ total: number, counts: number[][] }>}
  */
-export async function fetchLcqCommunityRankCounts(eventId, size) {
-  const n = Number(size) || 0
+export async function fetchLcqCommunityRankCounts(eventId, players) {
+  const roster = Array.isArray(players) ? players : []
+  const n = roster.length
   const empty = {
     total: 0,
     counts: Array.from({ length: n }, () => Array(n).fill(0)),
@@ -30,7 +31,13 @@ export async function fetchLcqCommunityRankCounts(eventId, size) {
         if (!res.ok) return null
         const data = await res.json().catch(() => ({}))
         const order1 = data?.prediction?.order1
-        return Array.isArray(order1) ? order1 : null
+        const order1Names = data?.prediction?.order1Names
+        const saved = Array.isArray(order1) && order1.some((value) => typeof value === 'string')
+          ? order1
+          : Array.isArray(order1Names) && order1Names.length > 0
+            ? order1Names
+            : order1
+        return Array.isArray(saved) ? saved : null
       } catch {
         return null
       }
@@ -40,8 +47,8 @@ export async function fetchLcqCommunityRankCounts(eventId, size) {
   const counts = Array.from({ length: n }, () => Array(n).fill(0))
   let total = 0
   for (const order of orders) {
-    if (!Array.isArray(order) || order.length === 0) continue
-    const reconciled = reconcileOrder(n, order)
+    if (!order) continue
+    const reconciled = reconcileLcqOrder(roster, order)
     total += 1
     reconciled.forEach((baselineIdx, rank) => {
       if (baselineIdx >= 0 && baselineIdx < n && rank >= 0 && rank < n) {
