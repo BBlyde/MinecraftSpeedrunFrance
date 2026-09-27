@@ -3,7 +3,8 @@ export function discordAvatarUrl(id, avatarHash) {
     const ext = String(avatarHash).startsWith('a_') ? 'gif' : 'png'
     return `https://cdn.discordapp.com/avatars/${id}/${avatarHash}.${ext}?size=64`
   }
-  const n = Number((BigInt(id) >> 22n) % 6n)
+  const snowflake = typeof id === 'string' && /^[0-9]+$/.test(id) ? id : null
+  const n = snowflake ? Number((BigInt(snowflake) >> 22n) % 6n) : 0
   return `https://cdn.discordapp.com/embed/avatars/${n}.png`
 }
 

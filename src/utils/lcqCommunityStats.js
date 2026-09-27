@@ -7,20 +7,11 @@ import { predictionApiUrl } from './predictionApi'
  * @param {{ name?: string }[]} players
  * @returns {Promise<{ total: number, counts: number[][] }>}
  */
-export async function fetchLcqCommunityRankCounts(eventId, players) {
-  const roster = Array.isArray(players) ? players : []
-  const n = roster.length
-  const empty = {
-    total: 0,
-    counts: Array.from({ length: n }, () => Array(n).fill(0)),
-  }
-  if (n <= 0) return empty
-
+export async function fetchCommunityPredictions(eventId) {
   const lbRes = await fetch(predictionApiUrl(`/prediction/${eventId}/leaderboard`))
   const lbData = lbRes.ok ? await lbRes.json().catch(() => ({})) : {}
   const users = Array.isArray(lbData.leaderboard) ? lbData.leaderboard : []
-
-  const orders = await Promise.all(
+  const predictions = await Promise.all(
     users.map(async (row) => {
       const discordId = row?.discordId
       if (!discordId) return null
@@ -30,25 +21,34 @@ export async function fetchLcqCommunityRankCounts(eventId, players) {
         )
         if (!res.ok) return null
         const data = await res.json().catch(() => ({}))
-        const order1 = data?.prediction?.order1
-        const order1Names = data?.prediction?.order1Names
-        const saved = Array.isArray(order1) && order1.some((value) => typeof value === 'string')
-          ? order1
-          : Array.isArray(order1Names) && order1Names.length > 0
-            ? order1Names
-            : order1
-        return Array.isArray(saved) ? saved : null
+        return data?.prediction && typeof data.prediction === 'object'
+          ? { discordId, prediction: data.prediction }
+          : null
       } catch {
         return null
       }
     }),
   )
+  return predictions.filter((row) => row?.prediction)
+}
 
+export function lcqRankCountsFromPredictions(players, predictions) {
+  const roster = Array.isArray(players) ? players : []
+  const n = roster.length
   const counts = Array.from({ length: n }, () => Array(n).fill(0))
   let total = 0
-  for (const order of orders) {
-    if (!order) continue
-    const reconciled = reconcileLcqOrder(roster, order)
+  if (n <= 0) return { total, counts }
+  for (const row of predictions ?? []) {
+    const prediction = row?.prediction && typeof row.prediction === 'object' ? row.prediction : row
+    const order1 = prediction?.order1
+    const order1Names = prediction?.order1Names
+    const saved = Array.isArray(order1) && order1.some((value) => typeof value === 'string')
+      ? order1
+      : Array.isArray(order1Names) && order1Names.length > 0
+        ? order1Names
+        : order1
+    if (!Array.isArray(saved)) continue
+    const reconciled = reconcileLcqOrder(roster, saved)
     total += 1
     reconciled.forEach((baselineIdx, rank) => {
       if (baselineIdx >= 0 && baselineIdx < n && rank >= 0 && rank < n) {
@@ -57,6 +57,15 @@ export async function fetchLcqCommunityRankCounts(eventId, players) {
     })
   }
   return { total, counts }
+}
+
+export async function fetchLcqCommunityRankCounts(eventId, players) {
+  const roster = Array.isArray(players) ? players : []
+  if (roster.length <= 0) {
+    return { total: 0, counts: [] }
+  }
+  const predictions = await fetchCommunityPredictions(eventId)
+  return lcqRankCountsFromPredictions(roster, predictions)
 }
 
 /** Varié pour le rendu local (évite 100% sur chaque ligne quand il n’y a qu’un prono). */

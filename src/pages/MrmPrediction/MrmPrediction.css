@@ -711,6 +711,57 @@
     border-bottom: 1px solid #2e2e2e;
 }
 
+.mrm-container.mrm-prediction .mrm-s11 .match {
+    overflow: visible;
+}
+
+.mrm-container.mrm-prediction .mrm-s11 .match:hover {
+    position: relative;
+    z-index: 4;
+}
+
+.mrm-container.mrm-prediction .mrm-s11 .match .player:first-child {
+    border-radius: 5px 5px 0 0;
+}
+
+.mrm-container.mrm-prediction .mrm-s11 .match .player:last-child {
+    border-radius: 0 0 5px 5px;
+}
+
+.mrm-container.mrm-prediction .mrm-s11 .match .player {
+    height: auto;
+    min-height: 40px;
+    padding-top: 0.12rem;
+    padding-bottom: 0.12rem;
+}
+
+.mrm-container.mrm-prediction .mrm-s11 .match .player-label {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 0;
+    min-width: 0;
+    flex: 1;
+}
+
+.mrm-container.mrm-prediction .mrm-s11 .match .player-label .player-name {
+    flex: 0 1 auto;
+    width: 100%;
+    min-width: 0;
+    line-height: 1.1;
+}
+
+.mrm-container.mrm-prediction .mrm-s11 .match .mrm-bracket-pick-pct {
+    flex: 0 0 auto;
+    min-width: 0;
+    margin-top: 1px;
+    font-size: 0.55rem;
+    font-weight: 700;
+    line-height: 1;
+    cursor: default;
+}
+
 .mrm-container.mrm-prediction .mrm-lcq-community-pct {
     display: inline-block;
     position: relative;

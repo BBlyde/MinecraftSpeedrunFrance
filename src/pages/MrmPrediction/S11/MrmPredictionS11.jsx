@@ -7,7 +7,7 @@ import { reconcileLcqOrder } from '../../Mrm/mrmPredictionStorage'
 import MrmPronosLeaderboard from '../../Mrm/MrmPronosLeaderboard'
 import { discordAvatarUrl, discordDisplayName } from '../../../utils/discordUser'
 import { predictionApiUrl } from '../../../utils/predictionApi'
-import { communityShareForRank, fetchLcqCommunityRankCounts, localDemoCommunityStats } from '../../../utils/lcqCommunityStats'
+import { communityShareForRank, fetchCommunityPredictions, lcqRankCountsFromPredictions, localDemoCommunityStats } from '../../../utils/lcqCommunityStats'
 import { predictionEventForSeason, predictionPagePath } from '../predictionSeason'
 import PredictionAuthBanner from '../PredictionAuthBanner'
 import {
@@ -38,6 +38,142 @@ import {
 
 const LCQ_SIZE = 16
 const LCQ_SEED_COUNT = 8
+
+function countedMatchWinner(pred, scoresKey, winnerKey, index, max) {
+  if (!pred || typeof pred !== 'object') return null
+  const scorePair = index == null ? pred[scoresKey] : pred[scoresKey]?.[index]
+  if (Array.isArray(scorePair) && scorePair.length >= 2) {
+    const left = Number(scorePair[0])
+    const right = Number(scorePair[1])
+    const decisive = (left >= max && left > right) || (right >= max && right > left)
+    if (!decisive) return null
+  }
+  const raw = index == null ? pred[winnerKey] : pred[winnerKey]?.[index]
+  if (raw == null || String(raw).trim() === '') return null
+  return String(raw).trim()
+}
+
+function savedCommunityPrediction(row) {
+  if (row?.prediction && typeof row.prediction === 'object') return row.prediction
+  return row && typeof row === 'object' ? row : null
+}
+
+function resolveStoredPid(raw, playerMap) {
+  if (raw == null || !playerMap) return null
+  const text = String(raw).trim()
+  if (!text) return null
+  if (playerMap.has(text)) return text
+  return resolveWinnerPid(text, [...playerMap.keys()], playerMap)
+}
+
+function winnerOnPair(raw, pid0, pid1, playerMap) {
+  const pid = resolveStoredPid(raw, playerMap)
+  if (pid == null || pid0 == null || pid1 == null) return null
+  return pid === pid0 || pid === pid1 ? pid : null
+}
+
+function bracketViewFromPrediction(pred, r16Pairs, playerMap) {
+  const r16 = (r16Pairs ?? []).map((pair, i) => ({
+    pid0: pair?.pid0 ?? null,
+    pid1: pair?.pid1 ?? null,
+    winner: winnerOnPair(
+      countedMatchWinner(pred, 'round16Scores', 'round16Winners', i, BO3),
+      pair?.pid0,
+      pair?.pid1,
+      playerMap,
+    ),
+  }))
+  const qf = Array.from({ length: QF_COUNT }, (_, i) => {
+    const pid0 = r16[i * 2]?.winner ?? null
+    const pid1 = r16[i * 2 + 1]?.winner ?? null
+    return {
+      pid0,
+      pid1,
+      winner: winnerOnPair(
+        countedMatchWinner(pred, 'quarterScores', 'quarterWinners', i, BO3),
+        pid0,
+        pid1,
+        playerMap,
+      ),
+    }
+  })
+  const semiFrom = (index, left, right) => {
+    const pid0 = qf[left]?.winner ?? null
+    const pid1 = qf[right]?.winner ?? null
+    const scoreKey = index === 0 ? 'semi1Score' : 'semi2Score'
+    const winnerKey = index === 0 ? 'semi1Winner' : 'semi2Winner'
+    return {
+      pid0,
+      pid1,
+      winner: winnerOnPair(
+        countedMatchWinner(pred, scoreKey, winnerKey, null, BO5),
+        pid0,
+        pid1,
+        playerMap,
+      ),
+    }
+  }
+  const semi1 = semiFrom(0, 0, 1)
+  const semi2 = semiFrom(1, 2, 3)
+  const finalPid0 = semi1.winner
+  const finalPid1 = semi2.winner
+  const thirdPid0 = matchLoserId([semi1.pid0, semi1.pid1], semi1.winner)
+  const thirdPid1 = matchLoserId([semi2.pid0, semi2.pid1], semi2.winner)
+  return {
+    r16,
+    qf,
+    semi1,
+    semi2,
+    final: {
+      pid0: finalPid0,
+      pid1: finalPid1,
+      winner: winnerOnPair(
+        countedMatchWinner(pred, 'finalScore', 'finalWinner', null, BO5),
+        finalPid0,
+        finalPid1,
+        playerMap,
+      ),
+    },
+    third: {
+      pid0: thirdPid0,
+      pid1: thirdPid1,
+      winner: winnerOnPair(
+        countedMatchWinner(pred, 'thirdPlaceScore', 'thirdPlaceWinner', null, BO5),
+        thirdPid0,
+        thirdPid1,
+        playerMap,
+      ),
+    },
+  }
+}
+
+function pickSharesFromViews(rows, liveView, discordId, pairs, readSlot) {
+  const viewerId = discordId ? String(discordId) : ''
+  return pairs.map((pair, index) => {
+    let total = 0
+    const counts = new Map()
+    let viewerSeen = false
+    const accept = (slot) => {
+      if (!slot?.winner) return
+      total += 1
+      counts.set(slot.winner, (counts.get(slot.winner) ?? 0) + 1)
+    }
+    for (const row of rows ?? []) {
+      const isViewer = viewerId !== '' && String(row?.discordId) === viewerId
+      if (isViewer) viewerSeen = true
+      const savedSlot = readSlot(row?.view, index)
+      const liveSlot = isViewer ? readSlot(liveView, index) : null
+      accept(liveSlot?.winner ? liveSlot : savedSlot)
+    }
+    if (!viewerSeen && viewerId) accept(readSlot(liveView, index))
+    const share = (pid) => {
+      if (pid == null) return null
+      if (total === 0) return 0
+      return (counts.get(pid) ?? 0) / total
+    }
+    return [share(pair?.pid0), share(pair?.pid1)]
+  })
+}
 
 function predictionHasLcqOrder(pred) {
   if (!pred || typeof pred !== 'object') return false
@@ -167,6 +303,7 @@ function MrmPredictionS11({ season = 11 }) {
   const [finishedInfo, setFinishedInfo] = useState(DEFAULT_FINISHED_STATE)
   const [officialInfo, setOfficialInfo] = useState(null)
   const [lcqCommunityStats, setLcqCommunityStats] = useState(null)
+  const [communityPredictions, setCommunityPredictions] = useState([])
   const [hasSavedPrediction, setHasSavedPrediction] = useState(false)
   const [hasSavedLcqOrder, setHasSavedLcqOrder] = useState(false)
   const [leikyNoticeOpen, setLeikyNoticeOpen] = useState(false)
@@ -249,6 +386,15 @@ function MrmPredictionS11({ season = 11 }) {
         pairFromSlots(r16Match(tournamentBracket, i), null, null, playerMap),
       ),
     [tournamentBracket, playerMap],
+  )
+
+  const communityViews = useMemo(
+    () =>
+      (communityPredictions ?? []).map((row) => ({
+        discordId: row?.discordId,
+        view: bracketViewFromPrediction(savedCommunityPrediction(row), r16Pairs, playerMap),
+      })),
+    [communityPredictions, r16Pairs, playerMap],
   )
 
   const r16Winners = useMemo(
@@ -536,13 +682,20 @@ function MrmPredictionS11({ season = 11 }) {
     let cancelled = false
     ;(async () => {
       try {
-        const stats = await fetchLcqCommunityRankCounts(eventId, lcq)
+        const predictions = await fetchCommunityPredictions(eventId)
+        const stats = lcqRankCountsFromPredictions(lcq, predictions)
         const usable = stats.total >= 2 ? stats : import.meta.env.DEV
           ? localDemoCommunityStats(lcq.length)
           : { total: 0, counts: [] }
-        if (!cancelled) setLcqCommunityStats(usable)
+        if (!cancelled) {
+          setCommunityPredictions(predictions)
+          setLcqCommunityStats(usable)
+        }
       } catch {
-        if (!cancelled) setLcqCommunityStats({ total: 0, counts: [] })
+        if (!cancelled) {
+          setCommunityPredictions([])
+          setLcqCommunityStats({ total: 0, counts: [] })
+        }
       }
     })()
     return () => {
@@ -773,6 +926,54 @@ function MrmPredictionS11({ season = 11 }) {
     return ''
   }, [])
 
+  const viewerDiscordId = readOnly ? viewDiscordId : discordUser?.id
+  const liveBracketPick = useMemo(
+    () => buildPayload(),
+    [
+      buildPayload,
+      round16Scores,
+      quarterScores,
+      semi1Score,
+      semi2Score,
+      thirdPlaceScore,
+      finalScore,
+      r16Winners,
+      qfWinners,
+      semi1Winner,
+      semi2Winner,
+      thirdPlaceWinner,
+      finalWinner,
+    ],
+  )
+  const liveView = useMemo(
+    () => bracketViewFromPrediction(liveBracketPick, r16Pairs, playerMap),
+    [liveBracketPick, r16Pairs, playerMap],
+  )
+
+  const r16PickShares = useMemo(
+    () => pickSharesFromViews(communityViews, liveView, viewerDiscordId, r16Pairs, (view, index) => view?.r16?.[index]),
+    [communityViews, liveView, viewerDiscordId, r16Pairs],
+  )
+  const qfPickShares = useMemo(
+    () => pickSharesFromViews(communityViews, liveView, viewerDiscordId, qfPairs, (view, index) => view?.qf?.[index]),
+    [communityViews, liveView, viewerDiscordId, qfPairs],
+  )
+  const semi1PickShares = useMemo(
+    () => pickSharesFromViews(communityViews, liveView, viewerDiscordId, [semi1Pair], (view) => view?.semi1),
+    [communityViews, liveView, viewerDiscordId, semi1Pair],
+  )
+  const semi2PickShares = useMemo(
+    () => pickSharesFromViews(communityViews, liveView, viewerDiscordId, [semi2Pair], (view) => view?.semi2),
+    [communityViews, liveView, viewerDiscordId, semi2Pair],
+  )
+  const finalPickShares = useMemo(
+    () => pickSharesFromViews(communityViews, liveView, viewerDiscordId, [finalPair], (view) => view?.final),
+    [communityViews, liveView, viewerDiscordId, finalPair],
+  )
+  const thirdPickShares = useMemo(
+    () => pickSharesFromViews(communityViews, liveView, viewerDiscordId, [petiteFinalePair], (view) => view?.third),
+    [communityViews, liveView, viewerDiscordId, petiteFinalePair],
+  )
   const officialR16Winners = useMemo(
     () =>
       r16Pairs.map((pair, i) =>
@@ -1032,6 +1233,8 @@ function MrmPredictionS11({ season = 11 }) {
                             comparisonClass0={bracketResultClass(pair.pid0, r16Winners[i], officialR16Winners[i], r16Scored)}
                             comparisonClass1={bracketResultClass(pair.pid1, r16Winners[i], officialR16Winners[i], r16Scored)}
                             resultsRevealed={r16Scored}
+                            communityShare0={r16PickShares[i]?.[0] ?? null}
+                            communityShare1={r16PickShares[i]?.[1] ?? null}
                           />
                         </div>
                       ))}
@@ -1065,6 +1268,8 @@ function MrmPredictionS11({ season = 11 }) {
                             comparisonClass0={bracketResultClass(pair.pid0, qfWinners[i], officialQfWinners[i], qfScored)}
                             comparisonClass1={bracketResultClass(pair.pid1, qfWinners[i], officialQfWinners[i], qfScored)}
                             resultsRevealed={qfScored}
+                            communityShare0={qfPickShares[i]?.[0] ?? null}
+                            communityShare1={qfPickShares[i]?.[1] ?? null}
                           />
                         </div>
                       ))}
@@ -1097,6 +1302,8 @@ function MrmPredictionS11({ season = 11 }) {
                           comparisonClass0={bracketResultClass(semi1Pair.pid0, semi1Winner, officialSemi1WinnerPid, playoffsSemi1Scored)}
                           comparisonClass1={bracketResultClass(semi1Pair.pid1, semi1Winner, officialSemi1WinnerPid, playoffsSemi1Scored)}
                           resultsRevealed={playoffsSemi1Scored}
+                          communityShare0={semi1PickShares[0]?.[0] ?? null}
+                          communityShare1={semi1PickShares[0]?.[1] ?? null}
                         />
                       </div>
                       <div className="bracket-slot">
@@ -1115,6 +1322,8 @@ function MrmPredictionS11({ season = 11 }) {
                           comparisonClass0={bracketResultClass(semi2Pair.pid0, semi2Winner, officialSemi2WinnerPid, playoffsSemi2Scored)}
                           comparisonClass1={bracketResultClass(semi2Pair.pid1, semi2Winner, officialSemi2WinnerPid, playoffsSemi2Scored)}
                           resultsRevealed={playoffsSemi2Scored}
+                          communityShare0={semi2PickShares[0]?.[0] ?? null}
+                          communityShare1={semi2PickShares[0]?.[1] ?? null}
                         />
                       </div>
                     </div>
@@ -1144,6 +1353,8 @@ function MrmPredictionS11({ season = 11 }) {
                           comparisonClass0={bracketResultClass(finalPair.pid0, finalWinner, officialFinalWinnerPid, playoffsFinalScored)}
                           comparisonClass1={bracketResultClass(finalPair.pid1, finalWinner, officialFinalWinnerPid, playoffsFinalScored)}
                           resultsRevealed={playoffsFinalScored}
+                          communityShare0={finalPickShares[0]?.[0] ?? null}
+                          communityShare1={finalPickShares[0]?.[1] ?? null}
                         />
                       </div>
                     </div>
@@ -1167,6 +1378,8 @@ function MrmPredictionS11({ season = 11 }) {
                       comparisonClass0={bracketResultClass(petiteFinalePair.pid0, thirdPlaceWinner, officialThirdPlaceWinnerPid, playoffsThirdScored)}
                       comparisonClass1={bracketResultClass(petiteFinalePair.pid1, thirdPlaceWinner, officialThirdPlaceWinnerPid, playoffsThirdScored)}
                       resultsRevealed={playoffsThirdScored}
+                      communityShare0={thirdPickShares[0]?.[0] ?? null}
+                      communityShare1={thirdPickShares[0]?.[1] ?? null}
                     />
                     <div className="round-label round-label-third">PETITE FINALE</div>
                   </div>

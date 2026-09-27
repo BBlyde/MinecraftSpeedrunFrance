@@ -638,6 +638,7 @@ export function BracketScoredPlayerRow({
   onScoreDigit,
   comparisonClass = '',
   resultsRevealed = false,
+  communityShare = null,
 }) {
   const isWinner = pid != null && winnerPid === pid
   const isTbd =
@@ -679,7 +680,11 @@ export function BracketScoredPlayerRow({
       className={rowCls.filter(Boolean).join(' ')}
       disabled={!canPick}
       onClick={handleRowClick}
-      aria-label={`${displayName}, ${scoreValue} jeu(x)`}
+      aria-label={
+        communityShare == null
+          ? `${displayName}, ${scoreValue} jeu(x)`
+          : `${formatCommunityShareLabel(communityShare)} ont pris ${displayName}, ${scoreValue} jeu(x)`
+      }
     >
       <span className="player-info">
         <img
@@ -689,7 +694,19 @@ export function BracketScoredPlayerRow({
           width={24}
           height={24}
         />
-        <span className="player-name">{displayName}</span>
+        {communityShare != null && !isTbd ? (
+          <span className="player-label">
+            <span className="player-name">{displayName}</span>
+            <span
+              className="mrm-lcq-community-pct mrm-bracket-pick-pct"
+              style={{ color: communityShareColor(communityShare) }}
+            >
+              {formatCommunityShareLabel(communityShare)}
+            </span>
+          </span>
+        ) : (
+          <span className="player-name">{displayName}</span>
+        )}
       </span>
       <span className="player-score">{scoreValue}</span>
     </button>
@@ -711,6 +728,8 @@ export function ScoredMatch({
   comparisonClass0 = '',
   comparisonClass1 = '',
   resultsRevealed = false,
+  communityShare0 = null,
+  communityShare1 = null,
 }) {
   return (
     <div className={[className, locked ? 'match--locked' : ''].filter(Boolean).join(' ')}>
@@ -727,6 +746,7 @@ export function ScoredMatch({
         onScoreDigit={(side) => onScoresChange(applyScoreDigitClick(scores, side, maxScore))}
         comparisonClass={comparisonClass0}
         resultsRevealed={resultsRevealed}
+        communityShare={communityShare0}
       />
       <BracketScoredPlayerRow
         pid={pid1}
@@ -741,6 +761,7 @@ export function ScoredMatch({
         onScoreDigit={(side) => onScoresChange(applyScoreDigitClick(scores, side, maxScore))}
         comparisonClass={comparisonClass1}
         resultsRevealed={resultsRevealed}
+        communityShare={communityShare1}
       />
     </div>
   )
