@@ -233,10 +233,13 @@ export function formatLcqDelta(value) {
   return `+${minutes}:${String(seconds).padStart(2, '0')}`
 }
 
-export function buildRankBandsForBaseline(baseline) {
+export function buildRankBandsForBaseline(baseline, { lowestWins = false } = {}) {
   if (!Array.isArray(baseline) || baseline.length === 0) return {}
   const indices = baseline.map((_, i) => i)
-  indices.sort((a, b) => Number(baseline[b].total) - Number(baseline[a].total))
+  indices.sort((a, b) => {
+    const delta = Number(baseline[a].total) - Number(baseline[b].total)
+    return lowestWins ? delta : -delta
+  })
   const bands = {}
   for (let pos = 0; pos < indices.length; pos += 1) {
     const baselineIdx = indices[pos]

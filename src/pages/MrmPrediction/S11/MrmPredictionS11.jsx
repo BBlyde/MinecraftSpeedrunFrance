@@ -735,7 +735,7 @@ function MrmPredictionS11({ season = 11 }) {
 
   const officialLcqBands = useMemo(() => {
     if (!lcqScored) return {}
-    return buildRankBandsForBaseline(lcq)
+    return buildRankBandsForBaseline(lcq, { lowestWins: true })
   }, [lcqScored, lcq])
 
   const groupRowResultClass = useCallback((baselineIdx, rank, rankBands, enabled) => {
