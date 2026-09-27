@@ -554,7 +554,6 @@
 
 .group-table td.is-dropped {
     text-decoration: line-through;
-    opacity: 0.4;
 }
 
 .group-table tbody tr.row-qualify td {
@@ -844,16 +843,29 @@
     background: #1a1a1a;
 }
 
-.group-table tbody tr.mrm-group-row-result-correct {
-    background: rgba(134, 206, 52, 0.16);
+.group-table tbody tr[class*="mrm-group-row-result-"],
+.group-table tbody tr[class*="mrm-group-row-result-"] td {
+    transition: none;
 }
 
-.group-table tbody tr.mrm-group-row-result-near {
-    background: rgba(255, 202, 40, 0.14);
+.group-table tbody tr.mrm-group-row-result-correct,
+.group-table tbody tr.row-qualify.mrm-group-row-result-correct {
+    background: rgba(88, 170, 78, 0.26);
 }
 
-.group-table tbody tr.mrm-group-row-result-wrong {
-    background: rgba(173, 54, 54, 0.16);
+.group-table tbody tr.mrm-group-row-result-off-one,
+.group-table tbody tr.row-qualify.mrm-group-row-result-off-one {
+    background: rgba(236, 196, 32, 0.28);
+}
+
+.group-table tbody tr.mrm-group-row-result-off-two,
+.group-table tbody tr.row-qualify.mrm-group-row-result-off-two {
+    background: rgba(235, 125, 28, 0.28);
+}
+
+.group-table tbody tr.mrm-group-row-result-wrong,
+.group-table tbody tr.row-qualify.mrm-group-row-result-wrong {
+    background: rgba(173, 54, 54, 0.28);
 }
 }
 

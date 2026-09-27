@@ -1,3 +1,4 @@
+import backendWrite from './api/backend-write.js'
 import discordStart from './api/auth/discord/index.js'
 import discordCallback from './api/auth/discord/callback.js'
 import authMe from './api/auth/me.js'
@@ -89,6 +90,10 @@ export function devApiPlugin() {
             }
             if (pathname === '/api/draftout/stats' && req.method === 'GET') {
               await draftoutStats(req, vres)
+              return
+            }
+            if (pathname === '/api/backend-write') {
+              await backendWrite(req, vres)
               return
             }
             if (pathname.startsWith('/api/mcsr/')) {

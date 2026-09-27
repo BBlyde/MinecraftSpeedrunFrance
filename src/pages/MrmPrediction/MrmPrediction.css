@@ -789,22 +789,9 @@
     background-image: linear-gradient(#ffffff18, #ffffff18);
 }
 
-.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.mrm-group-row-result-correct td.col-rank,
-.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.mrm-group-row-result-correct td.col-player {
-    background-color: #161b22;
-    background-image: linear-gradient(rgba(134, 206, 52, 0.16), rgba(134, 206, 52, 0.16));
-}
-
-.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.mrm-group-row-result-near td.col-rank,
-.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.mrm-group-row-result-near td.col-player {
-    background-color: #161b22;
-    background-image: linear-gradient(rgba(255, 202, 40, 0.14), rgba(255, 202, 40, 0.14));
-}
-
-.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.mrm-group-row-result-wrong td.col-rank,
-.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.mrm-group-row-result-wrong td.col-player {
-    background-color: #161b22;
-    background-image: linear-gradient(rgba(173, 54, 54, 0.16), rgba(173, 54, 54, 0.16));
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr[class*="mrm-group-row-result-"] td.is-dropped {
+    opacity: 1;
+    text-decoration: line-through;
 }
 
 .mrm-container.mrm-prediction .group-table tbody tr:hover,
@@ -813,10 +800,7 @@
 }
 
 .mrm-container.mrm-prediction .group-table tbody tr:hover td,
-.mrm-container.mrm-prediction .group-table tbody tr.row-qualify:hover td,
-.mrm-container.mrm-prediction .group-table tbody tr.mrm-group-row-result-correct:hover td,
-.mrm-container.mrm-prediction .group-table tbody tr.mrm-group-row-result-near:hover td,
-.mrm-container.mrm-prediction .group-table tbody tr.mrm-group-row-result-wrong:hover td {
+.mrm-container.mrm-prediction .group-table tbody tr.row-qualify:hover td {
     background: rgba(75, 75, 75, 0.2);
 }
 
@@ -826,6 +810,111 @@
 .mrm-container.mrm-prediction .group-table tbody tr.row-qualify:hover td.col-player {
     background-color: #161b22;
     background-image: linear-gradient(rgba(75, 75, 75, 0.35), rgba(75, 75, 75, 0.35));
+}
+
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.mrm-group-row-result-correct td.col-rank,
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.mrm-group-row-result-correct td.col-player,
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.mrm-group-row-result-correct td.col-pts,
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.row-qualify.mrm-group-row-result-correct td.col-rank,
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.row-qualify.mrm-group-row-result-correct td.col-player,
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.row-qualify.mrm-group-row-result-correct td.col-pts {
+    background: #27402d;
+    background-image: none;
+}
+
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.mrm-group-row-result-off-one td.col-rank,
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.mrm-group-row-result-off-one td.col-player,
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.mrm-group-row-result-off-one td.col-pts,
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.row-qualify.mrm-group-row-result-off-one td.col-rank,
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.row-qualify.mrm-group-row-result-off-one td.col-player,
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.row-qualify.mrm-group-row-result-off-one td.col-pts {
+    background: #524a21;
+    background-image: none;
+}
+
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.mrm-group-row-result-off-two td.col-rank,
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.mrm-group-row-result-off-two td.col-player,
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.mrm-group-row-result-off-two td.col-pts,
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.row-qualify.mrm-group-row-result-off-two td.col-rank,
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.row-qualify.mrm-group-row-result-off-two td.col-player,
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.row-qualify.mrm-group-row-result-off-two td.col-pts {
+    background: #523620;
+    background-image: none;
+}
+
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.mrm-group-row-result-wrong td.col-rank,
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.mrm-group-row-result-wrong td.col-player,
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.mrm-group-row-result-wrong td.col-pts,
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.row-qualify.mrm-group-row-result-wrong td.col-rank,
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.row-qualify.mrm-group-row-result-wrong td.col-player,
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.row-qualify.mrm-group-row-result-wrong td.col-pts {
+    background: #402328;
+    background-image: none;
+}
+
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.mrm-group-row-result-correct:hover,
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.row-qualify.mrm-group-row-result-correct:hover {
+    background: rgba(88, 170, 78, 0.4);
+}
+
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.mrm-group-row-result-off-one:hover,
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.row-qualify.mrm-group-row-result-off-one:hover {
+    background: rgba(236, 196, 32, 0.42);
+}
+
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.mrm-group-row-result-off-two:hover,
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.row-qualify.mrm-group-row-result-off-two:hover {
+    background: rgba(235, 125, 28, 0.42);
+}
+
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.mrm-group-row-result-wrong:hover,
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.row-qualify.mrm-group-row-result-wrong:hover {
+    background: rgba(173, 54, 54, 0.42);
+}
+
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr[class*="mrm-group-row-result-"]:hover td {
+    background: transparent;
+    background-image: none;
+}
+
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.mrm-group-row-result-correct:hover td.col-rank,
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.mrm-group-row-result-correct:hover td.col-player,
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.mrm-group-row-result-correct:hover td.col-pts,
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.row-qualify.mrm-group-row-result-correct:hover td.col-rank,
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.row-qualify.mrm-group-row-result-correct:hover td.col-player,
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.row-qualify.mrm-group-row-result-correct:hover td.col-pts {
+    background: #305434;
+    background-image: none;
+}
+
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.mrm-group-row-result-off-one:hover td.col-rank,
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.mrm-group-row-result-off-one:hover td.col-player,
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.mrm-group-row-result-off-one:hover td.col-pts,
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.row-qualify.mrm-group-row-result-off-one:hover td.col-rank,
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.row-qualify.mrm-group-row-result-off-one:hover td.col-player,
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.row-qualify.mrm-group-row-result-off-one:hover td.col-pts {
+    background: #706221;
+    background-image: none;
+}
+
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.mrm-group-row-result-off-two:hover td.col-rank,
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.mrm-group-row-result-off-two:hover td.col-player,
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.mrm-group-row-result-off-two:hover td.col-pts,
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.row-qualify.mrm-group-row-result-off-two:hover td.col-rank,
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.row-qualify.mrm-group-row-result-off-two:hover td.col-player,
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.row-qualify.mrm-group-row-result-off-two:hover td.col-pts {
+    background: #6f441f;
+    background-image: none;
+}
+
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.mrm-group-row-result-wrong:hover td.col-rank,
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.mrm-group-row-result-wrong:hover td.col-player,
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.mrm-group-row-result-wrong:hover td.col-pts,
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.row-qualify.mrm-group-row-result-wrong:hover td.col-rank,
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.row-qualify.mrm-group-row-result-wrong:hover td.col-player,
+.mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.row-qualify.mrm-group-row-result-wrong:hover td.col-pts {
+    background: #55262a;
+    background-image: none;
 }
 
 .mrm-sortable-row {

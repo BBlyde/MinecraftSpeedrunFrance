@@ -1,4 +1,4 @@
-import { next } from '@vercel/functions'
+import { next, rewrite } from '@vercel/functions'
 import { backendTargetUrl } from './lib/backendUrl.js'
 
 const NODE_ONLY = new Set(['/api/predictions/mrm', '/api/prediction/mrm', '/api/draftout/stats'])
@@ -10,17 +10,33 @@ function isWriteMethod(method) {
   return m !== 'GET' && m !== 'HEAD' && m !== 'OPTIONS'
 }
 
+function isAdminWritePath(pathname) {
+  return (
+    pathname === '/api/tournament' ||
+    pathname.startsWith('/api/tournament/') ||
+    pathname === '/api/lcq-mrm' ||
+    pathname.startsWith('/api/lcq-mrm/')
+  )
+}
+
 export default async function middleware(request) {
   const url = new URL(request.url)
   const method = request.method
-  const tournamentWrite =
-    url.pathname.startsWith('/api/tournament') && isWriteMethod(method)
-  const lcqWrite = url.pathname.startsWith('/api/lcq-mrm') && isWriteMethod(method)
+
+  // next() ne joint pas les routes catch-all dès qu’il y a plusieurs segments
+  // (POST /api/lcq-mrm/event/.../matches/... → 404 Vercel). On réécrit vers une fonction à un segment.
+  if (url.pathname === '/api/backend-write') {
+    return next()
+  }
+  if (isAdminWritePath(url.pathname) && isWriteMethod(method)) {
+    const dest = new URL('/api/backend-write', request.url)
+    dest.searchParams.set('path', url.pathname + url.search)
+    return rewrite(dest)
+  }
+
   if (
     url.pathname.startsWith('/api/auth') ||
     url.pathname.startsWith('/api/mcsr') ||
-    lcqWrite ||
-    tournamentWrite ||
     NODE_ONLY.has(url.pathname)
   ) {
     return next()

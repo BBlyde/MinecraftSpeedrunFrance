@@ -1,5 +1,5 @@
-import { proxyBrowserApiToBackendAdapter } from '../lib/backendApiProxy.js'
-import { denyUnlessAdmin, tournamentWriteRequiresAdmin } from '../lib/adminAuth.js'
+import { proxyBrowserApiToBackendAdapter } from '../../lib/backendApiProxy.js'
+import { denyUnlessAdmin, tournamentWriteRequiresAdmin } from '../../lib/adminAuth.js'
 
 export const config = {
   api: {
@@ -31,6 +31,11 @@ function lcqPathWithQuery(req) {
     : String(segments || '').replace(/^\/+/, '')
   if (sub) {
     return `/api/lcq-mrm/${sub}${qs}`
+  }
+
+  const stripped = pathname.replace(/^\/+/, '')
+  if (stripped && stripped !== 'api/lcq-mrm' && !stripped.startsWith('api/lcq-mrm/')) {
+    return `/api/lcq-mrm/${stripped}${qs}`
   }
 
   return `/api/lcq-mrm/${qs}`
