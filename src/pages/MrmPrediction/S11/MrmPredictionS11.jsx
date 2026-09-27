@@ -38,6 +38,12 @@ import {
 
 const LCQ_SIZE = 16
 const LCQ_SEED_COUNT = 8
+
+function predictionHasLcqOrder(pred) {
+  if (!pred || typeof pred !== 'object') return false
+  if (Array.isArray(pred.order1) && pred.order1.length > 0) return true
+  return Array.isArray(pred.order1Names) && pred.order1Names.length > 0
+}
 const LCQ_QUALIFY = 4
 const R16_COUNT = 8
 const QF_COUNT = 4
@@ -162,6 +168,7 @@ function MrmPredictionS11({ season = 11 }) {
   const [officialInfo, setOfficialInfo] = useState(null)
   const [lcqCommunityStats, setLcqCommunityStats] = useState(null)
   const [hasSavedPrediction, setHasSavedPrediction] = useState(false)
+  const [hasSavedLcqOrder, setHasSavedLcqOrder] = useState(false)
   const [leikyNoticeOpen, setLeikyNoticeOpen] = useState(false)
 
   const baselinePredictionPayloadRef = useRef(null)
@@ -428,6 +435,7 @@ function MrmPredictionS11({ season = 11 }) {
       setViewProfile(null)
       setViewHasPrediction(false)
       setHasSavedPrediction(false)
+      setHasSavedLcqOrder(false)
     }
 
     let cancelled = false
@@ -474,6 +482,7 @@ function MrmPredictionS11({ season = 11 }) {
         if (cancelled) return
         if (readOnly) setViewHasPrediction(pred != null)
         else setHasSavedPrediction(pred != null)
+        if (!cancelled) setHasSavedLcqOrder(predictionHasLcqOrder(pred))
 
         if (pred) {
           const savedOrder = Array.isArray(pred.order1) && pred.order1.some((value) => typeof value === 'string')
@@ -1222,7 +1231,7 @@ function MrmPredictionS11({ season = 11 }) {
                 scoreDisplay="delta"
                 getCommunityShare={getLcqCommunityShare}
                 getRowResultClass={(baselineIdx, rank) =>
-                  groupRowResultClass(baselineIdx, rank, officialLcqBands, lcqScored)}
+                  groupRowResultClass(baselineIdx, rank, officialLcqBands, lcqScored && hasSavedLcqOrder)}
               />
             </div>
           </div>
