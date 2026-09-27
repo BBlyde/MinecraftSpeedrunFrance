@@ -311,6 +311,14 @@ function MrmPredictionS11({ season = 11 }) {
   const baselinePredictionPayloadRef = useRef(null)
   const captureBaselineAfterHydrateRef = useRef(false)
   const matchPairKeysRef = useRef({})
+  const predictionMode = readOnly ? `view:${viewDiscordId}` : 'self'
+  const predictionModeRef = useRef(predictionMode)
+  if (predictionModeRef.current !== predictionMode) {
+    predictionModeRef.current = predictionMode
+    baselinePredictionPayloadRef.current = null
+    captureBaselineAfterHydrateRef.current = false
+    setHydrated(false)
+  }
 
   const isGlobalLocked = lockInfo.global.locked === true
   const isLegacyPlayoffsLocked = isGlobalLocked || lockInfo.playoffs.locked === true
@@ -842,10 +850,9 @@ function MrmPredictionS11({ season = 11 }) {
   useEffect(() => {
     if (!hydrated || !canSyncPrediction) return
     if (captureBaselineAfterHydrateRef.current) return
+    if (baselinePredictionPayloadRef.current == null) return
     const payloadStr = JSON.stringify(buildPayload())
-    if (baselinePredictionPayloadRef.current !== null && payloadStr === baselinePredictionPayloadRef.current) {
-      return
-    }
+    if (payloadStr === baselinePredictionPayloadRef.current) return
     const syncTimer = setTimeout(() => {
       void (async () => {
         try {
