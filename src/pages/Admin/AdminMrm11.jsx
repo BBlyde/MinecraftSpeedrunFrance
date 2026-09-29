@@ -2,9 +2,16 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import AdminPredictionRecompute, { S11_RECOMPUTE_PHASES } from './AdminPredictionRecompute'
 
 export const MRM11_EVENT_ID = 'mrm11'
-const LCQ_SIZE = 16
 const POLL_MS = 2500
 const IN_MATCH_STATUSES = new Set(['counting', 'generate', 'ready', 'running'])
+
+function publishSplitMatchId(matchId) {
+  fetch('/api/splits/match', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ matchId: String(matchId) }),
+  }).catch((err) => console.error('Envoi du match vers /splits', err))
+}
 
 const MATCH_DEFS = [
   ...Array.from({ length: 8 }, (_, i) => ({
@@ -247,37 +254,6 @@ function buildS11BracketPayload(formDataObj, current) {
   return bracket
 }
 
-function buildLcqPayload(formDataObj) {
-  return Array.from({ length: LCQ_SIZE }, (_, i) => ({
-    name: String(formDataObj[`lcq-${i}-name`] ?? '').trim(),
-    uuid: String(formDataObj[`lcq-${i}-uuid`] ?? '').trim(),
-  }))
-}
-
-function LcqPlayerRow({ index, player }) {
-  return (
-    <div className="admin-match">
-      <span className="match-label">#{index + 1}</span>
-      <div className="player-name">
-        <input
-          name={`lcq-${index}-name`}
-          className="player-field"
-          placeholder="Name"
-          defaultValue={player?.name ?? ''}
-        />
-      </div>
-      <div className="player-id">
-        <input
-          name={`lcq-${index}-uuid`}
-          className="player-field"
-          placeholder="UUID"
-          defaultValue={player?.uuid ?? ''}
-        />
-      </div>
-    </div>
-  )
-}
-
 function Mrm11Tracker({ tournament, onApplied }) {
   const [matchId, setMatchId] = useState(MATCH_DEFS[0].id)
   const [identifierInput, setIdentifierInput] = useState('')
@@ -294,6 +270,7 @@ function Mrm11Tracker({ tournament, onApplied }) {
   const inMatchRef = useRef(false)
   const baselineLastIdRef = useRef(null)
   const appliedMatchIdsRef = useRef(new Set())
+  const splitPublishedRef = useRef(new Set())
   const trackedMatchRef = useRef(MATCH_DEFS[0])
   const applyingRef = useRef(false)
 
@@ -397,8 +374,22 @@ function Mrm11Tracker({ tournament, onApplied }) {
         })
     }
 
-    if (status === 'done') tryApply(lastId)
+    const publishSplits = (id) => {
+      if (id == null) return
+      const matchId = String(id)
+      if (!/^\d+$/.test(matchId)) return
+      if (String(baselineLastIdRef.current ?? '') === matchId) return
+      if (splitPublishedRef.current.has(matchId)) return
+      splitPublishedRef.current.add(matchId)
+      publishSplitMatchId(matchId)
+    }
+
+    if (status === 'done') {
+      publishSplits(lastId)
+      tryApply(lastId)
+    }
     if (inMatchRef.current && status === 'idle') {
+      publishSplits(lastId)
       tryApply(lastId)
       inMatchRef.current = false
       baselineLastIdRef.current = lastId ?? null
@@ -549,23 +540,6 @@ function AdminMrm11() {
     setRefreshToken((value) => value + 1)
   }, [])
 
-  const handleLcqSubmit = async (event) => {
-    event.preventDefault()
-    if (!window.confirm('Confirmer la mise à jour du LCQ S11 ?')) return
-    const formDataObj = Object.fromEntries(new FormData(event.currentTarget).entries())
-    const payload = buildLcqPayload(formDataObj)
-    const posted = await requestJson(`/api/tournament/${MRM11_EVENT_ID}/lcq`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    })
-    if (!posted.ok) {
-      console.error('Erreur envoi LCQ S11', posted.body)
-      return
-    }
-    setRefreshToken((value) => value + 1)
-  }
-
   const handleBracketSubmit = async (event) => {
     event.preventDefault()
     if (!window.confirm('Confirmer la mise à jour du bracket S11 ?')) return
@@ -593,19 +567,6 @@ function AdminMrm11() {
         <span className="info">Chargement du bracket...</span>
       ) : (
         <>
-          <div className="group-section">
-            <div className="group-header">
-              <span>LCQ</span>
-              <span>Nom</span>
-              <span>Id</span>
-            </div>
-            <form onSubmit={handleLcqSubmit} className="form-lcq-roster" key={`${formKey}-lcq`}>
-              {Array.from({ length: LCQ_SIZE }, (_, i) => (
-                <LcqPlayerRow key={i} index={i} player={tournament?.lcq?.[i]} />
-              ))}
-              <button type="submit">Valider le LCQ</button>
-            </form>
-          </div>
           <div className="bracket-section">
           <form onSubmit={handleBracketSubmit} className="form-bracket" key={formKey}>
             {Array.from({ length: 8 }, (_, i) => (
