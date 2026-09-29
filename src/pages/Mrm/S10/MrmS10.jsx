@@ -2,17 +2,15 @@ import { useEffect, useState } from 'react'
 import './MrmS10.css'
 import { Link } from 'react-router-dom'
 import { TOURNAMENT_WS_URL, usePersistentWebSocket } from '../../../utils/usePersistentWebSocket'
-
-const BRACKET_PLACEHOLDER_UUID = '0385'
+import { minecraftHeadIdentifier, minecraftHeadUrl } from '../../../utils/minecraftHead'
 
 function BracketSlot({ player, winner = false }) {
-  const uuid = player?.id || BRACKET_PLACEHOLDER_UUID
   const name = player?.name || ''
   const score = player?.score ?? '0'
   return (
     <div className="player">
       <div className="player-info">
-        <img src={`https://mc-heads.net/avatar/${uuid}/64`} className="player-head" width={24} height={24} />
+        <img src={minecraftHeadUrl(minecraftHeadIdentifier(player?.id, name), 64)} className="player-head" width={24} height={24} />
         <span className='player-name'>{name ? name : 'TBD'}</span>
       </div>
       <span className={`player-score${winner ? ' player-score-winner' : ''}`}>{score}</span>
@@ -114,7 +112,7 @@ function MrmS10() {
             <div className="podium-wrapper">
               <div className="podium-player podium-second">
                 <div className="podium-head">
-                  <img src={`https://mc-heads.net/avatar/${finalLoser?.id ?? BRACKET_PLACEHOLDER_UUID}/64`} className="player-head" />
+                  <img src={minecraftHeadUrl(minecraftHeadIdentifier(finalLoser?.id, finalLoser?.name), 64)} className="player-head" />
                 </div>
                 <div className="podium-name">{finalLoser?.name ?? 'TBD'}</div>
                 <div className="podium-block podium-block-second">
@@ -123,7 +121,7 @@ function MrmS10() {
               </div>
               <div className="podium-player podium-first">
                 <div className="podium-head">
-                  <img src={`https://mc-heads.net/avatar/${finalWinner?.id ?? BRACKET_PLACEHOLDER_UUID}/64`} className="player-head" />
+                  <img src={minecraftHeadUrl(minecraftHeadIdentifier(finalWinner?.id, finalWinner?.name), 64)} className="player-head" />
                 </div>
                 <div className="podium-name">{finalWinner?.name ?? 'TBD'}</div>
                 <div className="podium-block podium-block-first">
@@ -132,7 +130,7 @@ function MrmS10() {
               </div>
               <div className="podium-player podium-third">
                 <div className="podium-head">
-                  <img src={`https://mc-heads.net/avatar/${lowerWinner?.id ?? BRACKET_PLACEHOLDER_UUID}/64`} className="player-head" />
+                  <img src={minecraftHeadUrl(minecraftHeadIdentifier(lowerWinner?.id, lowerWinner?.name), 64)} className="player-head" />
                 </div>
                 <div className="podium-name">{lowerWinner?.name ?? 'TBD'}</div>
                 <div className="podium-block podium-block-third">
@@ -169,7 +167,7 @@ function MrmS10() {
                         <tr key={i} className={i < 2 ? 'row-qualify' : ''}>
                           <td className="col-rank">{i + 1}</td>
                           <td className="col-player">
-                            <img src={`https://mc-heads.net/avatar/${player.uuid}/64`} className="player-head" />
+                            <img src={minecraftHeadUrl(minecraftHeadIdentifier(player.uuid, player.name), 64)} className="player-head" />
                             &nbsp;
                             &nbsp;
                             {player.name}
@@ -215,7 +213,7 @@ function MrmS10() {
                         <tr key={i} className={i < 2 ? 'row-qualify' : ''}>
                           <td className="col-rank">{i + 1}</td>
                           <td className="col-player">
-                            <img src={`https://mc-heads.net/avatar/${player.uuid}/64`} className="player-head" />
+                            <img src={minecraftHeadUrl(minecraftHeadIdentifier(player.uuid, player.name), 64)} className="player-head" />
                             &nbsp;
                             &nbsp;
                             {player.name}

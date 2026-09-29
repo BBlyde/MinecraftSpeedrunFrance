@@ -3,8 +3,7 @@ import './MrmS11.css'
 import { Link } from 'react-router-dom'
 import { TOURNAMENT_WS_URL, usePersistentWebSocket } from '../../../utils/usePersistentWebSocket'
 import { lcqEightSeedsEntered, lcqTotalFromSeeds, lcqWorstSeedIndex, LCQ_SEED_COUNT } from '../../../utils/lcqScoring'
-
-const BRACKET_PLACEHOLDER_UUID = '0385'
+import { minecraftHeadIdentifier, minecraftHeadUrl } from '../../../utils/minecraftHead'
 const LCQ_QUALIFY = 4
 
 function formatLcqDelta(value) {
@@ -59,13 +58,12 @@ function applyLcqFromTournament(data, setLcqPlayers) {
 }
 
 function BracketSlot({ player }) {
-  const uuid = player?.id || BRACKET_PLACEHOLDER_UUID
   const name = player?.name || ''
   const score = player?.score ?? '0'
   return (
     <div className="player">
       <div className="player-info">
-        <img src={`https://mc-heads.net/avatar/${uuid}/64`} className="player-head" width={24} height={24} />
+        <img src={minecraftHeadUrl(minecraftHeadIdentifier(player?.id, name), 64)} className="player-head" width={24} height={24} />
         <span className='player-name'>{name ? name : 'TBD'}</span>
       </div>
       <span className="player-score">{score}</span>
@@ -207,7 +205,7 @@ function MrmS11() {
             <div className="podium-wrapper">
               <div className="podium-player podium-second">
                 <div className="podium-head">
-                  <img src={`https://mc-heads.net/avatar/${BRACKET_PLACEHOLDER_UUID}/64`} className="player-head" />
+                  <img src={minecraftHeadUrl('steve', 64)} className="player-head" />
                 </div>
                 <div className="podium-name">TBD</div>
                 <div className="podium-block podium-block-second">
@@ -216,7 +214,7 @@ function MrmS11() {
               </div>
               <div className="podium-player podium-first">
                 <div className="podium-head">
-                  <img src={`https://mc-heads.net/avatar/${BRACKET_PLACEHOLDER_UUID}/64`} className="player-head" />
+                  <img src={minecraftHeadUrl('steve', 64)} className="player-head" />
                 </div>
                 <div className="podium-name">TBD</div>
                 <div className="podium-block podium-block-first">
@@ -225,7 +223,7 @@ function MrmS11() {
               </div>
               <div className="podium-player podium-third">
                 <div className="podium-head">
-                  <img src={`https://mc-heads.net/avatar/${BRACKET_PLACEHOLDER_UUID}/64`} className="player-head" />
+                  <img src={minecraftHeadUrl('steve', 64)} className="player-head" />
                 </div>
                 <div className="podium-name">TBD</div>
                 <div className="podium-block podium-block-third">
@@ -257,7 +255,7 @@ function MrmS11() {
                         <td className="col-rank">{i + 1}</td>
                         <td className="col-player">
                           <img
-                            src={`https://mc-heads.net/avatar/${player.uuid || BRACKET_PLACEHOLDER_UUID}/64`}
+                            src={minecraftHeadUrl(minecraftHeadIdentifier(player.uuid, player.name), 64)}
                             className="player-head"
                             alt=""
                           />
