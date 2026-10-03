@@ -25,7 +25,7 @@ export default async function middleware(request) {
 
   // next() ne joint pas les routes catch-all dès qu’il y a plusieurs segments
   // (POST /api/lcq-mrm/event/.../matches/... → 404 Vercel). On réécrit vers une fonction à un segment.
-  if (url.pathname === '/api/backend-write') {
+  if (url.pathname === '/api/backend-write' || url.pathname === '/api/mcsr-live') {
     return next()
   }
   if (isAdminWritePath(url.pathname) && isWriteMethod(method)) {
@@ -33,12 +33,14 @@ export default async function middleware(request) {
     dest.searchParams.set('path', url.pathname + url.search)
     return rewrite(dest)
   }
+  if (url.pathname === '/api/mcsr' || url.pathname.startsWith('/api/mcsr/')) {
+    const dest = new URL('/api/mcsr-live', request.url)
+    const rest = url.pathname.slice('/api/mcsr/'.length)
+    if (rest) dest.searchParams.set('path', rest)
+    return rewrite(dest)
+  }
 
-  if (
-    url.pathname.startsWith('/api/auth') ||
-    url.pathname.startsWith('/api/mcsr') ||
-    NODE_ONLY.has(url.pathname)
-  ) {
+  if (url.pathname.startsWith('/api/auth') || NODE_ONLY.has(url.pathname)) {
     return next()
   }
 

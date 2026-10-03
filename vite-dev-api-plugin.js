@@ -96,10 +96,12 @@ export function devApiPlugin() {
               await backendWrite(req, vres)
               return
             }
-            if (pathname.startsWith('/api/mcsr/')) {
+            if (pathname === '/api/mcsr-live' || pathname.startsWith('/api/mcsr/')) {
+              const rawPath = pathname === '/api/mcsr-live' ? query.path : pathname.slice('/api/mcsr/'.length)
+              const segments = Array.isArray(rawPath) ? rawPath : String(rawPath || '').split('/').filter(Boolean)
               req.query = {
                 ...query,
-                path: pathname.slice('/api/mcsr/'.length).split('/').filter(Boolean),
+                path: segments,
               }
               await mcsrLiveProxy(req, vres)
               return
