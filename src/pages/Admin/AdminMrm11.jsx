@@ -360,6 +360,8 @@ function Mrm11Tracker({ tournament, onApplied }) {
   const [message, setMessage] = useState(null)
 
   const abortRef = useRef(null)
+  const intervalRef = useRef(null)
+  const runningRef = useRef(false)
   const inMatchRef = useRef(false)
   const baselineLastIdRef = useRef(null)
   const appliedMatchIdsRef = useRef(new Set())
@@ -372,6 +374,7 @@ function Mrm11Tracker({ tournament, onApplied }) {
   const selectedDef = MATCH_DEFS.find((def) => def.id === matchId) ?? MATCH_DEFS[0]
 
   const fetchLive = useCallback(async (id, key) => {
+    if (!runningRef.current) return
     abortRef.current?.abort()
     const controller = new AbortController()
     abortRef.current = controller
@@ -384,6 +387,7 @@ function Mrm11Tracker({ tournament, onApplied }) {
         signal: controller.signal,
       })
       const payload = await response.json().catch(() => null)
+      if (!runningRef.current || abortRef.current !== controller) return
 
       if (!response.ok) {
         const detail =
@@ -404,6 +408,7 @@ function Mrm11Tracker({ tournament, onApplied }) {
       setError(null)
     } catch (err) {
       if (err.name === 'AbortError') return
+      if (!runningRef.current) return
       setError(err.message || 'Échec du fetch')
     } finally {
       if (abortRef.current === controller) setLoading(false)
@@ -414,8 +419,10 @@ function Mrm11Tracker({ tournament, onApplied }) {
     if (!running || !activeIdentifier || !activeKey) return
     fetchLive(activeIdentifier, activeKey)
     const intervalId = setInterval(() => fetchLive(activeIdentifier, activeKey), POLL_MS)
+    intervalRef.current = intervalId
     return () => {
       clearInterval(intervalId)
+      if (intervalRef.current === intervalId) intervalRef.current = null
       abortRef.current?.abort()
     }
   }, [running, activeIdentifier, activeKey, fetchLive])
@@ -498,12 +505,16 @@ function Mrm11Tracker({ tournament, onApplied }) {
     setMessage(null)
     inMatchRef.current = false
     baselineLastIdRef.current = null
+    runningRef.current = true
     setRunning(true)
   }
 
   const stopPull = () => {
-    setRunning(false)
+    runningRef.current = false
+    clearInterval(intervalRef.current)
+    intervalRef.current = null
     abortRef.current?.abort()
+    setRunning(false)
     setLoading(false)
   }
 
@@ -520,6 +531,7 @@ function Mrm11Tracker({ tournament, onApplied }) {
         className="admin-lcq-form"
         onSubmit={(event) => {
           event.preventDefault()
+          if (event.nativeEvent?.submitter?.dataset?.action !== 'start') return
           startPull()
         }}
       >
@@ -573,11 +585,18 @@ function Mrm11Tracker({ tournament, onApplied }) {
           </div>
         </div>
         {running ? (
-          <button type="button" onClick={stopPull}>
+          <button
+            type="button"
+            onClick={(event) => {
+              event.preventDefault()
+              event.stopPropagation()
+              stopPull()
+            }}
+          >
             Arrêter
           </button>
         ) : (
-          <button type="submit" disabled={!canStart}>
+          <button type="submit" data-action="start" disabled={!canStart}>
             Lancer le tracking
           </button>
         )}
