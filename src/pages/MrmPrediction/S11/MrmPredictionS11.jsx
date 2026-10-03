@@ -1176,7 +1176,6 @@ function MrmPredictionS11({ season = 11 }) {
                 </ul>
                 <p className="mrm-prediction-scoring-section">Arbre principal</p>
                 <ul className="mrm-prediction-scoring-list">
-                  <li>Sans pronostic LCQ enregistré : 0 sur tout l&apos;arbre</li>
                   <li>Huitièmes: +2 (Bonus score +3)</li>
                   <li>Quarts: +3 (Bonus score +4)</li>
                   <li>Demi-finale: +4 (Bonus score +6)</li>
@@ -1224,13 +1223,6 @@ function MrmPredictionS11({ season = 11 }) {
             <div className="mrm-playoffs">
               <div className="mrm-prediction-playoffs-head">
                 <h2 className="playoffs-title">ARBRE PRINCIPAL</h2>
-                {!readOnly && isLcqLocked && !hasSavedLcqOrder ? (
-                  <div className="mrm-prediction-hint-slot">
-                    <p className="mrm-prediction-hint">
-                      Tu peux remplir l&apos;arbre. Sans pronostic LCQ, il vaudra 0 point.
-                    </p>
-                  </div>
-                ) : null}
               </div>
               <div className="main-bracket">
                 <div className="bracket-round bracket-round-16">
