@@ -5,26 +5,35 @@ export const MRM11_EVENT_ID = 'mrm11'
 const POLL_MS = 2500
 const IN_MATCH_STATUSES = new Set(['counting', 'generate', 'ready', 'running'])
 const PRIVATE_KEY_STORAGE = 'msf-admin.mrm11.private-key'
+const IDENTIFIER_STORAGE = 'msf-admin.mrm11.identifier'
 const PRIVATE_KEY_REMEMBER = 'msf-admin.mrm11.remember-private-key'
 
-function readStoredPrivateKey() {
+function readStoredTracker() {
   try {
-    if (localStorage.getItem(PRIVATE_KEY_REMEMBER) !== '1') return { remember: false, key: '' }
-    return { remember: true, key: localStorage.getItem(PRIVATE_KEY_STORAGE) || '' }
+    if (localStorage.getItem(PRIVATE_KEY_REMEMBER) !== '1') {
+      return { remember: false, key: '', identifier: '' }
+    }
+    return {
+      remember: true,
+      key: localStorage.getItem(PRIVATE_KEY_STORAGE) || '',
+      identifier: localStorage.getItem(IDENTIFIER_STORAGE) || '',
+    }
   } catch {
-    return { remember: false, key: '' }
+    return { remember: false, key: '', identifier: '' }
   }
 }
 
-function writeStoredPrivateKey(remember, key) {
+function writeStoredTracker(remember, key, identifier) {
   try {
     if (!remember) {
       localStorage.removeItem(PRIVATE_KEY_REMEMBER)
       localStorage.removeItem(PRIVATE_KEY_STORAGE)
+      localStorage.removeItem(IDENTIFIER_STORAGE)
       return
     }
     localStorage.setItem(PRIVATE_KEY_REMEMBER, '1')
     localStorage.setItem(PRIVATE_KEY_STORAGE, key)
+    localStorage.setItem(IDENTIFIER_STORAGE, identifier)
   } catch {
     /* navigation privée ou quota */
   }
@@ -347,10 +356,10 @@ function buildS11BracketPayload(formDataObj, current) {
 
 function Mrm11Tracker({ tournament, onApplied }) {
   const [matchId, setMatchId] = useState(MATCH_DEFS[0].id)
-  const [storedPrivate] = useState(readStoredPrivateKey)
-  const [identifierInput, setIdentifierInput] = useState('')
-  const [privateKey, setPrivateKey] = useState(storedPrivate.key)
-  const [rememberPrivateKey, setRememberPrivateKey] = useState(storedPrivate.remember)
+  const [storedTracker] = useState(readStoredTracker)
+  const [identifierInput, setIdentifierInput] = useState(storedTracker.identifier)
+  const [privateKey, setPrivateKey] = useState(storedTracker.key)
+  const [rememberPrivateKey, setRememberPrivateKey] = useState(storedTracker.remember)
   const [running, setRunning] = useState(false)
   const [activeIdentifier, setActiveIdentifier] = useState('')
   const [activeKey, setActiveKey] = useState('')
@@ -372,6 +381,7 @@ function Mrm11Tracker({ tournament, onApplied }) {
   const identifier = parseIdentifier(identifierInput)
   const canStart = identifier.length > 0 && privateKey.trim().length > 0
   const selectedDef = MATCH_DEFS.find((def) => def.id === matchId) ?? MATCH_DEFS[0]
+  trackedMatchRef.current = selectedDef
 
   const fetchLive = useCallback(async (id, key) => {
     if (!runningRef.current) return
@@ -498,7 +508,6 @@ function Mrm11Tracker({ tournament, onApplied }) {
 
   const startPull = () => {
     if (!canStart) return
-    trackedMatchRef.current = selectedDef
     setActiveIdentifier(identifier)
     setActiveKey(privateKey.trim())
     setError(null)
@@ -537,7 +546,7 @@ function Mrm11Tracker({ tournament, onApplied }) {
       >
         <label className="admin-lcq-field">
           <span>Match</span>
-          <select value={matchId} onChange={(e) => setMatchId(e.target.value)} disabled={running}>
+          <select value={matchId} onChange={(e) => setMatchId(e.target.value)}>
             {matchOptions.map(({ def, label }) => (
               <option key={def.id} value={def.id}>
                 {label}
@@ -549,7 +558,11 @@ function Mrm11Tracker({ tournament, onApplied }) {
           <span>Pseudo (host / co-host)</span>
           <input
             value={identifierInput}
-            onChange={(e) => setIdentifierInput(e.target.value)}
+            onChange={(e) => {
+              const next = e.target.value
+              setIdentifierInput(next)
+              if (rememberPrivateKey) writeStoredTracker(true, privateKey, next)
+            }}
             placeholder="RED_LIME"
             spellCheck={false}
             disabled={running}
@@ -564,20 +577,20 @@ function Mrm11Tracker({ tournament, onApplied }) {
               onChange={(e) => {
                 const next = e.target.value
                 setPrivateKey(next)
-                if (rememberPrivateKey) writeStoredPrivateKey(true, next)
+                if (rememberPrivateKey) writeStoredTracker(true, next, identifierInput)
               }}
               placeholder="Clé in-game (Profile → Settings)"
               autoComplete="off"
               disabled={running}
             />
-            <label className="admin-lcq-save" title="Enregistrée uniquement dans ce navigateur.">
+            <label className="admin-lcq-save" title="Pseudo et clé enregistrés uniquement dans ce navigateur.">
               <input
                 type="checkbox"
                 checked={rememberPrivateKey}
                 onChange={(e) => {
                   const next = e.target.checked
                   setRememberPrivateKey(next)
-                  writeStoredPrivateKey(next, privateKey)
+                  writeStoredTracker(next, privateKey, identifierInput)
                 }}
               />
               <span>Save</span>
