@@ -4,6 +4,31 @@ import AdminPredictionRecompute, { S11_RECOMPUTE_PHASES } from './AdminPredictio
 export const MRM11_EVENT_ID = 'mrm11'
 const POLL_MS = 2500
 const IN_MATCH_STATUSES = new Set(['counting', 'generate', 'ready', 'running'])
+const PRIVATE_KEY_STORAGE = 'msf-admin.mrm11.private-key'
+const PRIVATE_KEY_REMEMBER = 'msf-admin.mrm11.remember-private-key'
+
+function readStoredPrivateKey() {
+  try {
+    if (localStorage.getItem(PRIVATE_KEY_REMEMBER) !== '1') return { remember: false, key: '' }
+    return { remember: true, key: localStorage.getItem(PRIVATE_KEY_STORAGE) || '' }
+  } catch {
+    return { remember: false, key: '' }
+  }
+}
+
+function writeStoredPrivateKey(remember, key) {
+  try {
+    if (!remember) {
+      localStorage.removeItem(PRIVATE_KEY_REMEMBER)
+      localStorage.removeItem(PRIVATE_KEY_STORAGE)
+      return
+    }
+    localStorage.setItem(PRIVATE_KEY_REMEMBER, '1')
+    localStorage.setItem(PRIVATE_KEY_STORAGE, key)
+  } catch {
+    /* navigation privée ou quota */
+  }
+}
 
 function publishSplitMatchId(matchId) {
   fetch('/api/splits/match', {
@@ -322,8 +347,10 @@ function buildS11BracketPayload(formDataObj, current) {
 
 function Mrm11Tracker({ tournament, onApplied }) {
   const [matchId, setMatchId] = useState(MATCH_DEFS[0].id)
+  const [storedPrivate] = useState(readStoredPrivateKey)
   const [identifierInput, setIdentifierInput] = useState('')
-  const [privateKey, setPrivateKey] = useState('')
+  const [privateKey, setPrivateKey] = useState(storedPrivate.key)
+  const [rememberPrivateKey, setRememberPrivateKey] = useState(storedPrivate.remember)
   const [running, setRunning] = useState(false)
   const [activeIdentifier, setActiveIdentifier] = useState('')
   const [activeKey, setActiveKey] = useState('')
@@ -516,17 +543,35 @@ function Mrm11Tracker({ tournament, onApplied }) {
             disabled={running}
           />
         </label>
-        <label className="admin-lcq-field">
+        <div className="admin-lcq-field">
           <span>Private-Key</span>
-          <input
-            type="password"
-            value={privateKey}
-            onChange={(e) => setPrivateKey(e.target.value)}
-            placeholder="Clé in-game (Profile → Settings)"
-            autoComplete="off"
-            disabled={running}
-          />
-        </label>
+          <div className="admin-lcq-key-row">
+            <input
+              type="password"
+              value={privateKey}
+              onChange={(e) => {
+                const next = e.target.value
+                setPrivateKey(next)
+                if (rememberPrivateKey) writeStoredPrivateKey(true, next)
+              }}
+              placeholder="Clé in-game (Profile → Settings)"
+              autoComplete="off"
+              disabled={running}
+            />
+            <label className="admin-lcq-save" title="Enregistrée uniquement dans ce navigateur.">
+              <input
+                type="checkbox"
+                checked={rememberPrivateKey}
+                onChange={(e) => {
+                  const next = e.target.checked
+                  setRememberPrivateKey(next)
+                  writeStoredPrivateKey(next, privateKey)
+                }}
+              />
+              <span>Save</span>
+            </label>
+          </div>
+        </div>
         {running ? (
           <button type="button" onClick={stopPull}>
             Arrêter

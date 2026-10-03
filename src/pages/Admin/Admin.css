@@ -181,6 +181,29 @@
   min-width: 260px;
 }
 
+.admin-lcq-key-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-lcq-save {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.admin-lcq-save input {
+  width: auto;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
 .admin-lcq-message {
   text-align: center;
   color: #86CE34;
