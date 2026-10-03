@@ -143,14 +143,18 @@ export function applyPredictionMetaFromApi(data, setFinishedInfo, setOfficialInf
   return { finished, official }
 }
 
+export function compactUuid(value) {
+  return String(value ?? '').replace(/-/g, '').trim().toLowerCase()
+}
+
 export function pidFromPlayerIdentity(playerMap, idOrUuid, name) {
-  const needleUuid = typeof idOrUuid === 'string' ? idOrUuid.trim().toLowerCase() : ''
+  const needleUuid = compactUuid(idOrUuid)
   const needleName = typeof name === 'string' ? name.trim().toLowerCase() : ''
   if (!needleUuid && !needleName) return null
   for (const [pid, player] of playerMap.entries()) {
-    const u = typeof player?.uuid === 'string' ? player.uuid.trim().toLowerCase() : ''
+    const u = compactUuid(player?.uuid)
     const n = typeof player?.name === 'string' ? player.name.trim().toLowerCase() : ''
-    if (needleUuid && u === needleUuid) return pid
+    if (needleUuid && u && u === needleUuid) return pid
     if (needleName && n === needleName) return pid
   }
   return null
@@ -421,7 +425,74 @@ export function playerFromSlot(slot) {
 
 export function pidFromSlot(slot, fallbackPid, playerMap) {
   if (!hasNamedSlot(slot)) return fallbackPid ?? null
-  return pidFromPlayerIdentity(playerMap, slot.id, slot.name) ?? fallbackPid ?? null
+  const known = pidFromPlayerIdentity(playerMap, slot.id, slot.name)
+  if (known) return known
+  const id = typeof slot.id === 'string' ? slot.id.trim() : ''
+  return id || fallbackPid || null
+}
+
+function winnerSide(score, max) {
+  const left = Number(score?.[0] ?? 0)
+  const right = Number(score?.[1] ?? 0)
+  if (left >= max && left > right) return 0
+  if (right >= max && right > left) return 1
+  return null
+}
+
+function sameBracketPlayer(left, right) {
+  const leftId = compactUuid(left?.id || left?.uuid)
+  const rightId = compactUuid(right?.id || right?.uuid)
+  if (leftId && rightId && leftId === rightId) return true
+  const leftName = String(left?.name ?? '').trim().toLowerCase()
+  const rightName = String(right?.name ?? '').trim().toLowerCase()
+  return Boolean(leftName && rightName && leftName !== 'tbd' && leftName === rightName)
+}
+
+/**
+ * Quand les quarts officiels sont remplis sur la page MRM :
+ * le score du quart est gardé si les deux runners sont ceux du prono (même inversés),
+ * sinon le quart repasse à 0-0 et la demi, la finale et la petite finale qui en dépendent sont effacées.
+ * Un quart encore juste laisse son vainqueur dans la demi.
+ */
+export function reconcileS11QuarterChain({
+  bracket,
+  round16Scores,
+  quarterScores,
+  semi1Score,
+  semi2Score,
+  finalScore,
+  thirdPlaceScore,
+}) {
+  const quarters = (quarterScores ?? []).map((score) => [Number(score?.[0] ?? 0), Number(score?.[1] ?? 0)])
+  const reset = [false, false, false, false]
+  for (let i = 0; i < 4; i += 1) {
+    const official = bracket?.quarter?.[i]
+    if (!hasNamedSlot(official?.[0]) || !hasNamedSlot(official?.[1])) continue
+    const leftMatch = bracket?.round16?.[i * 2]
+    const rightMatch = bracket?.round16?.[i * 2 + 1]
+    const leftSide = winnerSide(round16Scores?.[i * 2], 2)
+    const rightSide = winnerSide(round16Scores?.[i * 2 + 1], 2)
+    const predictedLeft = leftSide == null ? null : leftMatch?.[leftSide]
+    const predictedRight = rightSide == null ? null : rightMatch?.[rightSide]
+    const sameOrder = sameBracketPlayer(predictedLeft, official[0]) && sameBracketPlayer(predictedRight, official[1])
+    const swapped = sameBracketPlayer(predictedLeft, official[1]) && sameBracketPlayer(predictedRight, official[0])
+    if (sameOrder) continue
+    if (swapped) {
+      quarters[i] = [quarters[i][1], quarters[i][0]]
+      continue
+    }
+    reset[i] = true
+    quarters[i] = [0, 0]
+  }
+  const semi1Touched = reset[0] || reset[1]
+  const semi2Touched = reset[2] || reset[3]
+  return {
+    quarterScores: quarters,
+    semi1Score: semi1Touched ? [0, 0] : semi1Score,
+    semi2Score: semi2Touched ? [0, 0] : semi2Score,
+    finalScore: semi1Touched || semi2Touched ? [0, 0] : finalScore,
+    thirdPlaceScore: semi1Touched || semi2Touched ? [0, 0] : thirdPlaceScore,
+  }
 }
 
 function CommunityShareLabel({ share, className = '' }) {

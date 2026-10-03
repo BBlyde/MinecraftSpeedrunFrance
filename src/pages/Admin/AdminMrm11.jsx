@@ -162,6 +162,70 @@ function incrementSlot(slot) {
   return { ...slot, score: String(Number(slot.score ?? 0) + 1) }
 }
 
+const BO3_WINS = 2
+const BO5_WINS = 3
+
+function sameBracketPlayer(left, right) {
+  const leftId = normalizeUuid(left?.id || left?.uuid)
+  const rightId = normalizeUuid(right?.id || right?.uuid)
+  if (leftId && rightId) return leftId === rightId
+  const leftName = normalizeName(left?.name)
+  const rightName = normalizeName(right?.name)
+  return Boolean(leftName && rightName && leftName === rightName)
+}
+
+function decidedPlayer(match, winsNeeded, wantLoser) {
+  const leftScore = Number(match?.[0]?.score ?? 0)
+  const rightScore = Number(match?.[1]?.score ?? 0)
+  let winner = null
+  if (leftScore >= winsNeeded && leftScore > rightScore) winner = match[0]
+  else if (rightScore >= winsNeeded && rightScore > leftScore) winner = match[1]
+  if (!winner) return null
+  if (!wantLoser) return winner
+  return sameBracketPlayer(match[0], winner) ? match[1] : match[0]
+}
+
+function placeAdvancedPlayer(dest, incoming) {
+  if (sameBracketPlayer(dest, incoming)) {
+    return {
+      name: incoming.name || dest.name || '',
+      id: incoming.id || dest.id || '',
+      score: String(dest.score ?? '0'),
+    }
+  }
+  return { name: incoming.name || '', id: incoming.id || '', score: '0' }
+}
+
+function clearAdvancedSlot(dest, match) {
+  if (sameBracketPlayer(dest, match?.[0]) || sameBracketPlayer(dest, match?.[1])) return emptySlot()
+  return dest
+}
+
+function feedSlot(dest, match, winsNeeded, wantLoser = false) {
+  const player = decidedPlayer(match, winsNeeded, wantLoser)
+  if (!player) return clearAdvancedSlot(dest, match)
+  return placeAdvancedPlayer(dest, player)
+}
+
+function advanceS11Bracket(bracket) {
+  const next = normalizeBracket(bracket)
+  for (let i = 0; i < 8; i += 1) {
+    const quarterIndex = Math.floor(i / 2)
+    const side = i % 2
+    next.quarter[quarterIndex][side] = feedSlot(next.quarter[quarterIndex][side], next.round16[i], BO3_WINS)
+  }
+  for (let i = 0; i < 4; i += 1) {
+    const semiIndex = Math.floor(i / 2)
+    const side = i % 2
+    next.semi[semiIndex][side] = feedSlot(next.semi[semiIndex][side], next.quarter[i], BO3_WINS)
+  }
+  next.final[0] = feedSlot(next.final[0], next.semi[0], BO5_WINS)
+  next.final[1] = feedSlot(next.final[1], next.semi[1], BO5_WINS)
+  next.lower[0] = feedSlot(next.lower[0], next.semi[0], BO5_WINS, true)
+  next.lower[1] = feedSlot(next.lower[1], next.semi[1], BO5_WINS, true)
+  return next
+}
+
 async function applyWinToTournament(matchDef, winner) {
   const { ok, status, body } = await requestJson(`/api/tournament/${MRM11_EVENT_ID}`)
   if (!ok) {
@@ -199,10 +263,12 @@ async function applyWinToTournament(matchDef, winner) {
     bracket[matchDef.round] = round
   }
 
+  const advanced = advanceS11Bracket(bracket)
+
   const posted = await requestJson(`/api/tournament/${MRM11_EVENT_ID}/bracket`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(bracket),
+    body: JSON.stringify(advanced),
   })
   if (!posted.ok) throw new Error(`POST bracket échoué (${posted.status})`)
   return `${winner.nickname || winner.uuid} : +1 sur ${matchDef.baseLabel}`
@@ -251,7 +317,7 @@ function buildS11BracketPayload(formDataObj, current) {
   applyPair(bracket.semi[1], formDataObj, 'semi-1')
   applyPair(bracket.final, formDataObj, 'final')
   applyPair(bracket.lower, formDataObj, 'lower')
-  return bracket
+  return advanceS11Bracket(bracket)
 }
 
 function Mrm11Tracker({ tournament, onApplied }) {
@@ -475,7 +541,7 @@ function Mrm11Tracker({ tournament, onApplied }) {
       <p className="admin-mrm11-status">
         {running
           ? `${loading ? 'Fetch…' : 'Polling'} ${activeIdentifier} · ${matchLabel(trackedMatchRef.current, tournament)}`
-          : 'En pause — le gagnant du match live recevra +1 sur le match choisi (BO3 / BO5).'}
+          : 'En pause — le gagnant du match live recevra +1 (BO3 / BO5). Dès que le BO est gagné, il passe au match suivant.'}
       </p>
 
       {message && <p className="admin-lcq-message">{message}</p>}

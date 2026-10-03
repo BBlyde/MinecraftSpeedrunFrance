@@ -28,7 +28,9 @@ import {
   parseSavedPairScore,
   parseSavedScorePairs,
   pidFromPlayerIdentity,
+  pidFromSlot,
   placeholderPlayers,
+  reconcileS11QuarterChain,
   playerFromSlot,
   playerId,
   resolveWinnerPid,
@@ -244,14 +246,8 @@ function ingestSlot(map, slot, fallbackPid) {
 function pairFromSlots(slots, fallbackPid0, fallbackPid1, playerMap) {
   const slot0 = slots?.[0]
   const slot1 = slots?.[1]
-  const pid0 =
-    playerFromSlot(slot0)
-      ? pidFromPlayerIdentity(playerMap, slot0.id, slot0.name) ?? fallbackPid0
-      : fallbackPid0 ?? null
-  const pid1 =
-    playerFromSlot(slot1)
-      ? pidFromPlayerIdentity(playerMap, slot1.id, slot1.name) ?? fallbackPid1
-      : fallbackPid1 ?? null
+  const pid0 = pidFromSlot(slot0, fallbackPid0, playerMap)
+  const pid1 = pidFromSlot(slot1, fallbackPid1, playerMap)
   return {
     pid0: pid0 ?? null,
     pid1: pid1 ?? null,
@@ -644,13 +640,23 @@ function MrmPredictionS11({ season = 11 }) {
             : Array.isArray(pred.order1Names) && pred.order1Names.length > 0
               ? pred.order1Names
               : pred.order1
+          const round16 = parseSavedScorePairs(pred.round16Scores, R16_COUNT, BO3)
+          const aligned = reconcileS11QuarterChain({
+            bracket: tournamentBracket,
+            round16Scores: round16,
+            quarterScores: parseSavedScorePairs(pred.quarterScores, QF_COUNT, BO3),
+            semi1Score: parseSavedPairScore(pred.semi1Score, BO5) ?? [0, 0],
+            semi2Score: parseSavedPairScore(pred.semi2Score, BO5) ?? [0, 0],
+            finalScore: parseSavedPairScore(pred.finalScore, BO5) ?? [0, 0],
+            thirdPlaceScore: parseSavedPairScore(pred.thirdPlaceScore, BO5) ?? [0, 0],
+          })
           setOrder1(reconcileLcqOrder(lcq, savedOrder))
-          setRound16Scores(parseSavedScorePairs(pred.round16Scores, R16_COUNT, BO3))
-          setQuarterScores(parseSavedScorePairs(pred.quarterScores, QF_COUNT, BO3))
-          setSemi1Score(parseSavedPairScore(pred.semi1Score, BO5) ?? [0, 0])
-          setSemi2Score(parseSavedPairScore(pred.semi2Score, BO5) ?? [0, 0])
-          setThirdPlaceScore(parseSavedPairScore(pred.thirdPlaceScore, BO5) ?? [0, 0])
-          setFinalScore(parseSavedPairScore(pred.finalScore, BO5) ?? [0, 0])
+          setRound16Scores(round16)
+          setQuarterScores(aligned.quarterScores)
+          setSemi1Score(aligned.semi1Score)
+          setSemi2Score(aligned.semi2Score)
+          setThirdPlaceScore(aligned.thirdPlaceScore)
+          setFinalScore(aligned.finalScore)
         } else {
           setOrder1(defaultOrder)
           setRound16Scores(emptyScorePairs(R16_COUNT))
