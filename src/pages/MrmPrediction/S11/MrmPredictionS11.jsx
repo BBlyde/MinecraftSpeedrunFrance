@@ -148,7 +148,7 @@ function bracketViewFromPrediction(pred, r16Pairs, playerMap) {
   }
 }
 
-function pickSharesFromViews(rows, liveView, discordId, pairs, readSlot) {
+function pickSharesFromViews(rows, liveView, discordId, pairs, readSlot, countsView = () => true) {
   const viewerId = discordId ? String(discordId) : ''
   return pairs.map((pair, index) => {
     let total = 0
@@ -162,11 +162,12 @@ function pickSharesFromViews(rows, liveView, discordId, pairs, readSlot) {
     for (const row of rows ?? []) {
       const isViewer = viewerId !== '' && String(row?.discordId) === viewerId
       if (isViewer) viewerSeen = true
-      const savedSlot = readSlot(row?.view, index)
       const liveSlot = isViewer ? readSlot(liveView, index) : null
-      accept(liveSlot?.winner ? liveSlot : savedSlot)
+      const view = liveSlot?.winner ? liveView : row?.view
+      if (!countsView(view, index)) continue
+      accept(liveSlot?.winner ? liveSlot : readSlot(row?.view, index))
     }
-    if (!viewerSeen && viewerId) accept(readSlot(liveView, index))
+    if (!viewerSeen && viewerId && countsView(liveView, index)) accept(readSlot(liveView, index))
     const share = (pid) => {
       if (pid == null) return null
       if (total === 0) return 0
@@ -176,6 +177,16 @@ function pickSharesFromViews(rows, liveView, discordId, pairs, readSlot) {
   })
 }
 
+/** Un huitième déjà décidé et raté ne compte plus dans les % du reste de l'arbre. */
+function countsAfterR16(view, r16Indexes, officialWinners) {
+  for (const i of r16Indexes) {
+    const official = officialWinners?.[i]
+    if (!official) continue
+    if (view?.r16?.[i]?.winner !== official) return false
+  }
+  return true
+}
+
 function predictionHasLcqOrder(pred) {
   if (!pred || typeof pred !== 'object') return false
   if (Array.isArray(pred.order1) && pred.order1.length > 0) return true
@@ -183,6 +194,7 @@ function predictionHasLcqOrder(pred) {
 }
 const LCQ_QUALIFY = 4
 const R16_COUNT = 8
+const ALL_R16_INDEXES = Array.from({ length: R16_COUNT }, (_, i) => i)
 const QF_COUNT = 4
 const BO3 = 2
 const BO5 = 3
@@ -953,30 +965,6 @@ function MrmPredictionS11({ season = 11 }) {
     [liveBracketPick, r16Pairs, playerMap],
   )
 
-  const r16PickShares = useMemo(
-    () => pickSharesFromViews(communityViews, liveView, viewerDiscordId, r16Pairs, (view, index) => view?.r16?.[index]),
-    [communityViews, liveView, viewerDiscordId, r16Pairs],
-  )
-  const qfPickShares = useMemo(
-    () => pickSharesFromViews(communityViews, liveView, viewerDiscordId, qfPairs, (view, index) => view?.qf?.[index]),
-    [communityViews, liveView, viewerDiscordId, qfPairs],
-  )
-  const semi1PickShares = useMemo(
-    () => pickSharesFromViews(communityViews, liveView, viewerDiscordId, [semi1Pair], (view) => view?.semi1),
-    [communityViews, liveView, viewerDiscordId, semi1Pair],
-  )
-  const semi2PickShares = useMemo(
-    () => pickSharesFromViews(communityViews, liveView, viewerDiscordId, [semi2Pair], (view) => view?.semi2),
-    [communityViews, liveView, viewerDiscordId, semi2Pair],
-  )
-  const finalPickShares = useMemo(
-    () => pickSharesFromViews(communityViews, liveView, viewerDiscordId, [finalPair], (view) => view?.final),
-    [communityViews, liveView, viewerDiscordId, finalPair],
-  )
-  const thirdPickShares = useMemo(
-    () => pickSharesFromViews(communityViews, liveView, viewerDiscordId, [petiteFinalePair], (view) => view?.third),
-    [communityViews, liveView, viewerDiscordId, petiteFinalePair],
-  )
   const officialR16Winners = useMemo(
     () =>
       r16Pairs.map((pair, i) =>
@@ -989,6 +977,70 @@ function MrmPredictionS11({ season = 11 }) {
         ),
       ),
     [officialInfo, r16Pairs, playerMap, tournamentBracket],
+  )
+  const r16PickShares = useMemo(
+    () => pickSharesFromViews(communityViews, liveView, viewerDiscordId, r16Pairs, (view, index) => view?.r16?.[index]),
+    [communityViews, liveView, viewerDiscordId, r16Pairs],
+  )
+  const qfPickShares = useMemo(
+    () =>
+      pickSharesFromViews(
+        communityViews,
+        liveView,
+        viewerDiscordId,
+        qfPairs,
+        (view, index) => view?.qf?.[index],
+        (view, index) => countsAfterR16(view, [index * 2, index * 2 + 1], officialR16Winners),
+      ),
+    [communityViews, liveView, viewerDiscordId, qfPairs, officialR16Winners],
+  )
+  const semi1PickShares = useMemo(
+    () =>
+      pickSharesFromViews(
+        communityViews,
+        liveView,
+        viewerDiscordId,
+        [semi1Pair],
+        (view) => view?.semi1,
+        (view) => countsAfterR16(view, [0, 1, 2, 3], officialR16Winners),
+      ),
+    [communityViews, liveView, viewerDiscordId, semi1Pair, officialR16Winners],
+  )
+  const semi2PickShares = useMemo(
+    () =>
+      pickSharesFromViews(
+        communityViews,
+        liveView,
+        viewerDiscordId,
+        [semi2Pair],
+        (view) => view?.semi2,
+        (view) => countsAfterR16(view, [4, 5, 6, 7], officialR16Winners),
+      ),
+    [communityViews, liveView, viewerDiscordId, semi2Pair, officialR16Winners],
+  )
+  const finalPickShares = useMemo(
+    () =>
+      pickSharesFromViews(
+        communityViews,
+        liveView,
+        viewerDiscordId,
+        [finalPair],
+        (view) => view?.final,
+        (view) => countsAfterR16(view, ALL_R16_INDEXES, officialR16Winners),
+      ),
+    [communityViews, liveView, viewerDiscordId, finalPair, officialR16Winners],
+  )
+  const thirdPickShares = useMemo(
+    () =>
+      pickSharesFromViews(
+        communityViews,
+        liveView,
+        viewerDiscordId,
+        [petiteFinalePair],
+        (view) => view?.third,
+        (view) => countsAfterR16(view, ALL_R16_INDEXES, officialR16Winners),
+      ),
+    [communityViews, liveView, viewerDiscordId, petiteFinalePair, officialR16Winners],
   )
   const officialQfWinners = useMemo(
     () =>
