@@ -228,23 +228,25 @@ function homePath(season) {
   return predictionPagePath(season)
 }
 
+function roundMatch(round, index) {
+  if (!Array.isArray(round)) return [null, null]
+  if (Array.isArray(round[0])) {
+    const match = round[index]
+    return Array.isArray(match) ? match : [null, null]
+  }
+  return [round[index * 2] ?? null, round[index * 2 + 1] ?? null]
+}
+
 function r16Match(bracket, index) {
-  const match = bracket?.round16?.[index]
-  return Array.isArray(match) ? match : [null, null]
+  return roundMatch(bracket?.round16, index)
 }
 
 function qfMatch(bracket, index) {
-  const match = bracket?.quarter?.[index]
-  return Array.isArray(match) ? match : [null, null]
+  return roundMatch(bracket?.quarter, index)
 }
 
 function sfMatch(bracket, index) {
-  const semi = bracket?.semi
-  if (Array.isArray(semi?.[0])) {
-    const match = semi?.[index]
-    return Array.isArray(match) ? match : [null, null]
-  }
-  return [semi?.[index * 2] ?? null, semi?.[index * 2 + 1] ?? null]
+  return roundMatch(bracket?.semi, index)
 }
 
 function ingestSlot(map, slot, fallbackPid) {
@@ -386,10 +388,12 @@ function MrmPredictionS11({ season = 11 }) {
     ingestSlot(m, sf1[1], 'sf:0:1')
     ingestSlot(m, sf2[0], 'sf:1:0')
     ingestSlot(m, sf2[1], 'sf:1:1')
-    ingestSlot(m, bracket?.final?.[0], 'final:0')
-    ingestSlot(m, bracket?.final?.[1], 'final:1')
-    ingestSlot(m, bracket?.lower?.[0], 'third:0')
-    ingestSlot(m, bracket?.lower?.[1], 'third:1')
+    const final = roundMatch(bracket?.final, 0)
+    const lower = roundMatch(bracket?.lower, 0)
+    ingestSlot(m, final[0], 'final:0')
+    ingestSlot(m, final[1], 'final:1')
+    ingestSlot(m, lower[0], 'third:0')
+    ingestSlot(m, lower[1], 'third:1')
     return m
   }, [lcq, tournamentBracket])
 
@@ -474,7 +478,7 @@ function MrmPredictionS11({ season = 11 }) {
   const finalPair = useMemo(
     () =>
       pairFromSlots(
-        tournamentBracket?.final,
+        roundMatch(tournamentBracket?.final, 0),
         showTreeNames ? semi1Winner : null,
         showTreeNames ? semi2Winner : null,
         playerMap,
@@ -485,7 +489,7 @@ function MrmPredictionS11({ season = 11 }) {
   const petiteFinalePair = useMemo(
     () =>
       pairFromSlots(
-        tournamentBracket?.lower,
+        roundMatch(tournamentBracket?.lower, 0),
         showTreeNames ? matchLoserId([semi1Pair.pid0, semi1Pair.pid1], semi1Winner) : null,
         showTreeNames ? matchLoserId([semi2Pair.pid0, semi2Pair.pid1], semi2Winner) : null,
         playerMap,

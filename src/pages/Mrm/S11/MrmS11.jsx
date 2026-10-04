@@ -71,6 +71,16 @@ function BracketSlot({ player }) {
   )
 }
 
+/** Match `index` d'un round. Le backend envoie soit des matchs `[[a, b], ...]`, soit une liste plate de joueurs. */
+function matchAt(round, index) {
+  if (!Array.isArray(round)) return [null, null]
+  if (Array.isArray(round[0])) {
+    const match = round[index]
+    return Array.isArray(match) ? [match[0] ?? null, match[1] ?? null] : [null, null]
+  }
+  return [round[index * 2] ?? null, round[index * 2 + 1] ?? null]
+}
+
 function MrmS11() {
   const [mrmData, setMrmData] = useState(null)
   const [lcqPlayers, setLcqPlayers] = useState([])
@@ -100,12 +110,11 @@ function MrmS11() {
   })
 
   const bracket = mrmData?.bracket
-  const round16 = bracket?.round16 ?? []
-  const quarterFinal = bracket?.quarter ?? []
-  const semiFinal = [
-    [bracket?.semi?.[0], bracket?.semi?.[1]],
-    [bracket?.semi?.[2], bracket?.semi?.[3]],
-  ]
+  const round16 = Array.from({ length: 8 }, (_, i) => matchAt(bracket?.round16, i))
+  const quarterFinal = Array.from({ length: 4 }, (_, i) => matchAt(bracket?.quarter, i))
+  const semiFinal = Array.from({ length: 2 }, (_, i) => matchAt(bracket?.semi, i))
+  const finalMatch = matchAt(bracket?.final, 0)
+  const lowerMatch = matchAt(bracket?.lower, 0)
   return (
     <div className="mrm-s11 mrm-prediction-content-wrap">
       <div className="container">
@@ -180,8 +189,8 @@ function MrmS11() {
                   <div className="bracket-column">
                     <div className="bracket-slot">
                       <div className="match match-final">
-                        <BracketSlot player={bracket?.final?.[0]} />
-                        <BracketSlot player={bracket?.final?.[1]} />
+                        <BracketSlot player={finalMatch[0]} />
+                        <BracketSlot player={finalMatch[1]} />
                       </div>
                     </div>
                   </div>
@@ -191,8 +200,8 @@ function MrmS11() {
                     <line x1="1" y1="0" x2="1" y2="32" stroke="#3a3a3a" strokeWidth="2" strokeDasharray="5 3" />
                   </svg>
                   <div className="match match-third-place">
-                    <BracketSlot player={bracket?.lower?.[0]} />
-                    <BracketSlot player={bracket?.lower?.[1]} />
+                    <BracketSlot player={lowerMatch[0]} />
+                    <BracketSlot player={lowerMatch[1]} />
                   </div>
                   <div className="round-label round-label-third">PETITE FINALE</div>
                 </div>
