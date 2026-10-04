@@ -81,6 +81,33 @@ function matchAt(round, index) {
   return [round[index * 2] ?? null, round[index * 2 + 1] ?? null]
 }
 
+const FINAL_WINS = 3
+
+function namedPlayer(player) {
+  const name = typeof player?.name === 'string' ? player.name.trim() : ''
+  return name ? player : null
+}
+
+function matchWinner(match, winsNeeded) {
+  const left = namedPlayer(match?.[0])
+  const right = namedPlayer(match?.[1])
+  if (!left || !right) return null
+  const leftScore = Number(left.score)
+  const rightScore = Number(right.score)
+  if (!Number.isFinite(leftScore) || !Number.isFinite(rightScore)) return null
+  if (leftScore >= winsNeeded && leftScore > rightScore) return left
+  if (rightScore >= winsNeeded && rightScore > leftScore) return right
+  return null
+}
+
+function matchLoser(match, winsNeeded) {
+  const winner = matchWinner(match, winsNeeded)
+  if (!winner) return null
+  const left = namedPlayer(match?.[0])
+  const right = namedPlayer(match?.[1])
+  return left === winner ? right : left
+}
+
 function MrmS11() {
   const [mrmData, setMrmData] = useState(null)
   const [lcqPlayers, setLcqPlayers] = useState([])
@@ -115,6 +142,9 @@ function MrmS11() {
   const semiFinal = Array.from({ length: 2 }, (_, i) => matchAt(bracket?.semi, i))
   const finalMatch = matchAt(bracket?.final, 0)
   const lowerMatch = matchAt(bracket?.lower, 0)
+  const finalWinner = matchWinner(finalMatch, FINAL_WINS)
+  const finalLoser = matchLoser(finalMatch, FINAL_WINS)
+  const lowerWinner = matchWinner(lowerMatch, FINAL_WINS)
   return (
     <div className="mrm-s11 mrm-prediction-content-wrap">
       <div className="container">
@@ -214,27 +244,27 @@ function MrmS11() {
             <div className="podium-wrapper">
               <div className="podium-player podium-second">
                 <div className="podium-head">
-                  <img src={minecraftHeadUrl('steve', 64)} className="player-head" />
+                  <img src={minecraftHeadUrl(minecraftHeadIdentifier(finalLoser?.id, finalLoser?.name), 64)} className="player-head" alt="" />
                 </div>
-                <div className="podium-name">TBD</div>
+                <div className="podium-name">{finalLoser?.name ?? 'TBD'}</div>
                 <div className="podium-block podium-block-second">
                   <span className="podium-rank">2</span>
                 </div>
               </div>
               <div className="podium-player podium-first">
                 <div className="podium-head">
-                  <img src={minecraftHeadUrl('steve', 64)} className="player-head" />
+                  <img src={minecraftHeadUrl(minecraftHeadIdentifier(finalWinner?.id, finalWinner?.name), 64)} className="player-head" alt="" />
                 </div>
-                <div className="podium-name">TBD</div>
+                <div className="podium-name">{finalWinner?.name ?? 'TBD'}</div>
                 <div className="podium-block podium-block-first">
                   <span className="podium-rank">1</span>
                 </div>
               </div>
               <div className="podium-player podium-third">
                 <div className="podium-head">
-                  <img src={minecraftHeadUrl('steve', 64)} className="player-head" />
+                  <img src={minecraftHeadUrl(minecraftHeadIdentifier(lowerWinner?.id, lowerWinner?.name), 64)} className="player-head" alt="" />
                 </div>
-                <div className="podium-name">TBD</div>
+                <div className="podium-name">{lowerWinner?.name ?? 'TBD'}</div>
                 <div className="podium-block podium-block-third">
                   <span className="podium-rank">3</span>
                 </div>
