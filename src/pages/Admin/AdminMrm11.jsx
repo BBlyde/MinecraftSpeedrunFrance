@@ -449,6 +449,9 @@ function Mrm11Tracker({ tournament, onApplied }) {
       return
     }
 
+    const fromLive = inMatchRef.current
+    const destination = MATCH_DEFS.find((def) => def.id === matchId) ?? trackedMatchRef.current
+
     const tryApply = (id) => {
       if (applyingRef.current) return
       const winner = getLiveWinner(match)
@@ -457,25 +460,28 @@ function Mrm11Tracker({ tournament, onApplied }) {
         return
       }
 
-      const matchKey =
-        id != null && /^\d+$/.test(String(id))
-          ? String(id)
-          : `live-${normalizeUuid(winner.uuid)}-${match?.completions?.[0]?.time ?? match?.time ?? 'x'}`
-      if (appliedMatchIdsRef.current.has(matchKey)) return
-      if (id != null && String(baselineLastIdRef.current ?? '') === String(id)) return
+      const time = match?.completions?.[0]?.time ?? match?.result?.time ?? match?.time ?? 'x'
+      const liveKey = `${id ?? 'live'}:${normalizeUuid(winner.uuid)}:${time}`
+      const sameAsBaseline = id != null && String(baselineLastIdRef.current ?? '') === String(id)
+      if (appliedMatchIdsRef.current.has(liveKey)) return
+      if (!fromLive && sameAsBaseline) return
 
-      appliedMatchIdsRef.current.add(matchKey)
+      appliedMatchIdsRef.current.add(liveKey)
       applyingRef.current = true
       setMessage(`Victoire de ${winner.nickname || winner.uuid} — mise à jour du score…`)
       setError(null)
 
-      applyWinToTournament(trackedMatchRef.current, winner)
+      applyWinToTournament(destination, winner)
         .then((okMessage) => {
+          if (fromLive) {
+            inMatchRef.current = false
+            baselineLastIdRef.current = id ?? null
+          }
           setMessage(okMessage)
           onApplied?.()
         })
         .catch((err) => {
-          appliedMatchIdsRef.current.delete(matchKey)
+          appliedMatchIdsRef.current.delete(liveKey)
           setMessage(null)
           setError(err.message || 'Échec de la mise à jour du score')
         })
@@ -486,25 +492,20 @@ function Mrm11Tracker({ tournament, onApplied }) {
 
     const publishSplits = (id) => {
       if (id == null) return
-      const matchId = String(id)
-      if (!/^\d+$/.test(matchId)) return
-      if (String(baselineLastIdRef.current ?? '') === matchId) return
-      if (splitPublishedRef.current.has(matchId)) return
-      splitPublishedRef.current.add(matchId)
-      publishSplitMatchId(matchId)
+      const liveMatchId = String(id)
+      if (!/^\d+$/.test(liveMatchId)) return
+      const sameAsBaseline = String(baselineLastIdRef.current ?? '') === liveMatchId
+      if (!fromLive && sameAsBaseline) return
+      if (splitPublishedRef.current.has(liveMatchId)) return
+      splitPublishedRef.current.add(liveMatchId)
+      publishSplitMatchId(liveMatchId)
     }
 
-    if (status === 'done') {
+    if (status === 'done' || (fromLive && status === 'idle')) {
       publishSplits(lastId)
       tryApply(lastId)
     }
-    if (inMatchRef.current && status === 'idle') {
-      publishSplits(lastId)
-      tryApply(lastId)
-      inMatchRef.current = false
-      baselineLastIdRef.current = lastId ?? null
-    }
-  }, [match, running, onApplied])
+  }, [match, running, onApplied, matchId])
 
   const startPull = () => {
     if (!canStart) return
