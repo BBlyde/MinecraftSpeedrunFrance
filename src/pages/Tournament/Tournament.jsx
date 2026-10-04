@@ -92,7 +92,7 @@ function Tournament() {
     <div className="d-flex flex-column align-items-center text-white tournament-container">
       <div className="tournament-header">
         <div className="tournament-title-row">
-          <span className="tournament-title">ARCHIVES TOURNOIS</span>
+          <span className="tournament-title">ARCHIVES TOURNOI</span>
         </div>
         <span className="tournament-subtitle">Résultats des tournois communautaires MSF</span>
       </div>

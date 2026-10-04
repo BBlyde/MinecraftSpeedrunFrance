@@ -4,14 +4,14 @@ import { Link } from 'react-router-dom'
 import { TOURNAMENT_WS_URL, usePersistentWebSocket } from '../../../utils/usePersistentWebSocket'
 import { minecraftHeadIdentifier, minecraftHeadUrl } from '../../../utils/minecraftHead'
 
-function BracketSlot({ player, winner = false }) {
+function BracketSlot({ player, winner = false, loser = false }) {
   const name = player?.name || ''
   const score = player?.score ?? '0'
   return (
-    <div className="player">
+    <div className={`player${loser ? ' player-loser' : ''}`}>
       <div className="player-info">
         <img src={minecraftHeadUrl(minecraftHeadIdentifier(player?.id, name), 64)} className="player-head" width={24} height={24} />
-        <span className='player-name'>{name ? name : 'TBD'}</span>
+        <span className={`player-name${winner ? ' player-name-winner' : ''}`}>{name ? name : 'TBD'}</span>
       </div>
       <span className={`player-score${winner ? ' player-score-winner' : ''}`}>{score}</span>
     </div>
@@ -35,6 +35,13 @@ function getMatchLoser(match, requiredScore) {
 function isMatchWinner(match, index) {
   if (!match?.[0] || !match?.[1]) return false
   return Number(match[index].score) > Number(match[index === 0 ? 1 : 0].score)
+}
+
+function isMatchLoser(match, index) {
+  if (!match?.[0] || !match?.[1]) return false
+  const score = Number(match[index].score)
+  const opponentScore = Number(match[index === 0 ? 1 : 0].score)
+  return Number.isFinite(score) && Number.isFinite(opponentScore) && score < opponentScore
 }
 
 function MrmS10() {
@@ -77,18 +84,18 @@ function MrmS10() {
               </div>
               <div className="bracket-matches">
                 <div className="match">
-                  <BracketSlot player={bracket?.semi?.[0]} winner={isMatchWinner(bracket?.semi, 0)} />
-                  <BracketSlot player={bracket?.semi?.[1]} winner={isMatchWinner(bracket?.semi, 1)} />
+                  <BracketSlot player={bracket?.semi?.[0]} winner={isMatchWinner(bracket?.semi, 0)} loser={isMatchLoser(bracket?.semi, 0)} />
+                  <BracketSlot player={bracket?.semi?.[1]} winner={isMatchWinner(bracket?.semi, 1)} loser={isMatchLoser(bracket?.semi, 1)} />
                 </div>
                 <div className="connector connector-left" />
                 <div className="match match-final">
-                  <BracketSlot player={bracket?.final?.[0]} winner={isMatchWinner(bracket?.final, 0)} />
-                  <BracketSlot player={bracket?.final?.[1]} winner={isMatchWinner(bracket?.final, 1)} />
+                  <BracketSlot player={bracket?.final?.[0]} winner={isMatchWinner(bracket?.final, 0)} loser={isMatchLoser(bracket?.final, 0)} />
+                  <BracketSlot player={bracket?.final?.[1]} winner={isMatchWinner(bracket?.final, 1)} loser={isMatchLoser(bracket?.final, 1)} />
                 </div>
                 <div className="connector connector-right" />
                 <div className="match">
-                  <BracketSlot player={bracket?.semi?.[2]} winner={isMatchWinner(bracket?.semi?.slice(2), 0)} />
-                  <BracketSlot player={bracket?.semi?.[3]} winner={isMatchWinner(bracket?.semi?.slice(2), 1)} />
+                  <BracketSlot player={bracket?.semi?.[2]} winner={isMatchWinner(bracket?.semi?.slice(2), 0)} loser={isMatchLoser(bracket?.semi?.slice(2), 0)} />
+                  <BracketSlot player={bracket?.semi?.[3]} winner={isMatchWinner(bracket?.semi?.slice(2), 1)} loser={isMatchLoser(bracket?.semi?.slice(2), 1)} />
                 </div>
               </div>
               <div className="third-place-wrapper">
@@ -99,8 +106,8 @@ function MrmS10() {
                 <div className="bracket-third-place">
                   <div className="round-label round-label-third">PETITE FINALE</div>
                   <div className="match match-third-place">
-                    <BracketSlot player={bracket?.lower?.[0]} winner={isMatchWinner(bracket?.lower, 0)} />
-                    <BracketSlot player={bracket?.lower?.[1]} winner={isMatchWinner(bracket?.lower, 1)} />
+                    <BracketSlot player={bracket?.lower?.[0]} winner={isMatchWinner(bracket?.lower, 0)} loser={isMatchLoser(bracket?.lower, 0)} />
+                    <BracketSlot player={bracket?.lower?.[1]} winner={isMatchWinner(bracket?.lower, 1)} loser={isMatchLoser(bracket?.lower, 1)} />
                   </div>
                 </div>
               </div>
@@ -120,7 +127,15 @@ function MrmS10() {
                 </div>
               </div>
               <div className="podium-player podium-first">
-                <div className="podium-head">
+                <div className="podium-head podium-head-winner">
+                  {finalWinner && (
+                    <svg className="podium-crown" viewBox="0 0 48 20" role="img" aria-label="Couronne du champion" shapeRendering="crispEdges">
+                      <path d="M3 14V6H6V9H9V11H12V12H14V5H17V8H19V9H22V5H24V2H26V5H29V9H31V8H34V5H36V12H39V11H42V9H45V6H48V14H45V18H6V14Z" fill="#F5B91B" />
+                      <path d="M3 14H48V18H3Z" fill="#C78313" />
+                      <path d="M7 14H41V16H7Z" fill="#FFE58A" />
+                      <path d="M10 12H12V14H10ZM23 7H25V9H23ZM36 12H38V14H36Z" fill="#E85D5D" />
+                    </svg>
+                  )}
                   <img src={minecraftHeadUrl(minecraftHeadIdentifier(finalWinner?.id, finalWinner?.name), 64)} className="player-head" />
                 </div>
                 <div className="podium-name">{finalWinner?.name ?? 'TBD'}</div>

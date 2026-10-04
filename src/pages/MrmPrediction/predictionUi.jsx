@@ -227,14 +227,16 @@ export function placeholderPlayers(count, seedCount = 8) {
 /** LCQ seed delta: milliseconds stored, display `+m:ss` (ties broken by leftover ms). */
 export function formatLcqDelta(value) {
   if (typeof value === 'string' && value.trim().startsWith('+')) {
-    return value.trim()
+    const delta = value.trim()
+    return delta === '+5:00' ? '+5' : delta
   }
   const n = Number(value)
   const ms = Number.isFinite(n) ? Math.max(0, n) : 0
   const totalSeconds = Math.floor(ms / 1000)
   const minutes = Math.floor(totalSeconds / 60)
   const seconds = totalSeconds % 60
-  return `+${minutes}:${String(seconds).padStart(2, '0')}`
+  const delta = `+${minutes}:${String(seconds).padStart(2, '0')}`
+  return delta === '+5:00' ? '+5' : delta
 }
 
 export function buildRankBandsForBaseline(baseline, { lowestWins = false } = {}) {
@@ -468,14 +470,14 @@ export function resolveOfficialWinnerPid(rawWinner, pairIds, playerMap, bracketS
   )
 }
 
-function SortableGroupRow({ id, qualify, dragDisabled, resultClass = '', children }) {
+function SortableGroupRow({ id, qualify, dragDisabled, resultClass = '', noHoverTransition = false, children }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id,
     disabled: dragDisabled,
   })
   const style = {
     transform: CSS.Transform.toString(transform ? { ...transform, x: 0 } : null),
-    transition,
+    transition: transition ?? (noHoverTransition ? 'none' : undefined),
   }
   const rowClass = [
     qualify ? 'row-qualify' : '',
@@ -537,6 +539,18 @@ export function SortableGroupTable({
   )
 
   const showCommunityShare = typeof getCommunityShare === 'function'
+  const seedRanks = scoreDisplay === 'delta'
+    ? Array.from({ length: seedCount }, (_, seed) => {
+        const ranked = baseline
+          .map((player, index) => ({ index, time: Number(player?.[`s${seed + 1}`]) }))
+          .filter(({ index, time }) => {
+            const name = String(baseline[index]?.name ?? '').trim().toLowerCase()
+            return name !== '' && name !== 'tbd' && Number.isFinite(time)
+          })
+          .sort((left, right) => left.time - right.time || left.index - right.index)
+        return new Map(ranked.map(({ index }, rank) => [index, rank + 1]))
+      })
+    : []
 
   return (
     <div
@@ -596,6 +610,7 @@ export function SortableGroupTable({
                       qualify={rank < qualifyCount}
                       dragDisabled={!interactionsEnabled}
                       resultClass={resultClass}
+                      noHoverTransition={scoreDisplay === 'delta'}
                     >
                       <td className="col-rank">{rank + 1}</td>
                       <td className="col-player">
@@ -609,14 +624,18 @@ export function SortableGroupTable({
                           />
                         ) : null}
                       </td>
-                      {Array.from({ length: seedCount }, (_, i) => (
-                        <td
-                          key={i}
-                          className={p?.droppedSeed === i ? 'is-dropped' : undefined}
-                        >
-                          {formatScore(p?.[`s${i + 1}`] ?? 0)}
-                        </td>
-                      ))}
+                      {Array.from({ length: seedCount }, (_, i) => {
+                        const seedRank = seedRanks[i]?.get(baselineIdx)
+                        const delta = formatScore(p?.[`s${i + 1}`] ?? 0)
+                        const placeClass = seedRank <= 3 ? `lcq-place-${seedRank}` : ''
+                        return (
+                          <td key={i} className={placeClass || undefined}>
+                            <span className={p?.droppedSeed === i ? 'is-dropped' : undefined}>
+                              {seedRank === 1 && delta === '+0:00' ? '+0' : delta}
+                            </span>
+                          </td>
+                        )
+                      })}
                       <td className="col-pts">{formatScore(p?.total ?? 0)}</td>
                     </SortableGroupRow>
                   )

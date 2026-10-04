@@ -8,14 +8,16 @@ const LCQ_QUALIFY = 4
 
 function formatLcqDelta(value) {
   if (typeof value === 'string' && value.trim().startsWith('+')) {
-    return value.trim()
+    const delta = value.trim()
+    return delta === '+5:00' ? '+5' : delta
   }
   const n = Number(value)
   const ms = Number.isFinite(n) ? Math.max(0, n) : 0
   const totalSeconds = Math.floor(ms / 1000)
   const minutes = Math.floor(totalSeconds / 60)
   const seconds = totalSeconds % 60
-  return `+${minutes}:${String(seconds).padStart(2, '0')}`
+  const delta = `+${minutes}:${String(seconds).padStart(2, '0')}`
+  return delta === '+5:00' ? '+5' : delta
 }
 
 function normalizeLcqPlayer(row) {
@@ -57,16 +59,16 @@ function applyLcqFromTournament(data, setLcqPlayers) {
   }
 }
 
-function BracketSlot({ player }) {
+function BracketSlot({ player, winner = false, loser = false }) {
   const name = player?.name || ''
   const score = player?.score ?? '0'
   return (
-    <div className="player">
+    <div className={`player${loser ? ' player-loser' : ''}`}>
       <div className="player-info">
         <img src={minecraftHeadUrl(minecraftHeadIdentifier(player?.id, name), 64)} className="player-head" width={24} height={24} />
-        <span className='player-name'>{name ? name : 'TBD'}</span>
+        <span className={`player-name${winner ? ' player-name-winner' : ''}`}>{name ? name : 'TBD'}</span>
       </div>
-      <span className="player-score">{score}</span>
+      <span className={`player-score${winner ? ' player-score-winner' : ''}`}>{score}</span>
     </div>
   )
 }
@@ -98,6 +100,20 @@ function matchWinner(match, winsNeeded) {
   if (leftScore >= winsNeeded && leftScore > rightScore) return left
   if (rightScore >= winsNeeded && rightScore > leftScore) return right
   return null
+}
+
+function isMatchWinner(match, index) {
+  if (!match?.[0] || !match?.[1]) return false
+  const opponentIndex = index === 0 ? 1 : 0
+  return Number(match[index].score) > Number(match[opponentIndex].score)
+}
+
+function isMatchLoser(match, index) {
+  if (!match?.[0] || !match?.[1]) return false
+  const opponentIndex = index === 0 ? 1 : 0
+  const score = Number(match[index].score)
+  const opponentScore = Number(match[opponentIndex].score)
+  return Number.isFinite(score) && Number.isFinite(opponentScore) && score < opponentScore
 }
 
 function matchLoser(match, winsNeeded) {
@@ -145,6 +161,13 @@ function MrmS11() {
   const finalWinner = matchWinner(finalMatch, FINAL_WINS)
   const finalLoser = matchLoser(finalMatch, FINAL_WINS)
   const lowerWinner = matchWinner(lowerMatch, FINAL_WINS)
+  const lcqSeedRankings = Array.from({ length: LCQ_SEED_COUNT }, (_, seed) => {
+    const rankedPlayers = lcqPlayers
+      .map((player, index) => ({ index, time: Number(player[`s${seed + 1}`]) || 0 }))
+      .sort((left, right) => left.time - right.time || left.index - right.index)
+    return new Map(rankedPlayers.map(({ index }, rank) => [index, rank + 1]))
+  })
+
   return (
     <div className="mrm-s11 mrm-prediction-content-wrap">
       <div className="container">
@@ -159,8 +182,8 @@ function MrmS11() {
                     {Array.from({ length: 8 }).map((_, i) => (
                       <div className="bracket-slot" key={i}>
                         <div className="match">
-                          <BracketSlot player={round16[i]?.[0]} />
-                          <BracketSlot player={round16[i]?.[1]} />
+                          <BracketSlot player={round16[i]?.[0]} winner={isMatchWinner(round16[i], 0)} loser={isMatchLoser(round16[i], 0)} />
+                          <BracketSlot player={round16[i]?.[1]} winner={isMatchWinner(round16[i], 1)} loser={isMatchLoser(round16[i], 1)} />
                         </div>
                       </div>
                     ))}
@@ -180,8 +203,8 @@ function MrmS11() {
                     {Array.from({ length: 4 }).map((_, i) => (
                       <div className="bracket-slot" key={i}>
                         <div className="match">
-                          <BracketSlot player={quarterFinal[i]?.[0]} />
-                          <BracketSlot player={quarterFinal[i]?.[1]} />
+                          <BracketSlot player={quarterFinal[i]?.[0]} winner={isMatchWinner(quarterFinal[i], 0)} loser={isMatchLoser(quarterFinal[i], 0)} />
+                          <BracketSlot player={quarterFinal[i]?.[1]} winner={isMatchWinner(quarterFinal[i], 1)} loser={isMatchLoser(quarterFinal[i], 1)} />
                         </div>
                       </div>
                     ))}
@@ -201,8 +224,8 @@ function MrmS11() {
                     {Array.from({ length: 2 }).map((_, i) => (
                       <div className="bracket-slot" key={i}>
                         <div className="match">
-                          <BracketSlot player={semiFinal[i]?.[0]} />
-                          <BracketSlot player={semiFinal[i]?.[1]} />
+                          <BracketSlot player={semiFinal[i]?.[0]} winner={isMatchWinner(semiFinal[i], 0)} loser={isMatchLoser(semiFinal[i], 0)} />
+                          <BracketSlot player={semiFinal[i]?.[1]} winner={isMatchWinner(semiFinal[i], 1)} loser={isMatchLoser(semiFinal[i], 1)} />
                         </div>
                       </div>
                     ))}
@@ -219,8 +242,8 @@ function MrmS11() {
                   <div className="bracket-column">
                     <div className="bracket-slot">
                       <div className="match match-final">
-                        <BracketSlot player={finalMatch[0]} />
-                        <BracketSlot player={finalMatch[1]} />
+                        <BracketSlot player={finalMatch[0]} winner={isMatchWinner(finalMatch, 0)} loser={isMatchLoser(finalMatch, 0)} />
+                        <BracketSlot player={finalMatch[1]} winner={isMatchWinner(finalMatch, 1)} loser={isMatchLoser(finalMatch, 1)} />
                       </div>
                     </div>
                   </div>
@@ -230,8 +253,8 @@ function MrmS11() {
                     <line x1="1" y1="0" x2="1" y2="32" stroke="#3a3a3a" strokeWidth="2" strokeDasharray="5 3" />
                   </svg>
                   <div className="match match-third-place">
-                    <BracketSlot player={lowerMatch[0]} />
-                    <BracketSlot player={lowerMatch[1]} />
+                    <BracketSlot player={lowerMatch[0]} winner={isMatchWinner(lowerMatch, 0)} loser={isMatchLoser(lowerMatch, 0)} />
+                    <BracketSlot player={lowerMatch[1]} winner={isMatchWinner(lowerMatch, 1)} loser={isMatchLoser(lowerMatch, 1)} />
                   </div>
                   <div className="round-label round-label-third">PETITE FINALE</div>
                 </div>
@@ -252,7 +275,15 @@ function MrmS11() {
                 </div>
               </div>
               <div className="podium-player podium-first">
-                <div className="podium-head">
+                <div className="podium-head podium-head-winner">
+                  {finalWinner && (
+                    <svg className="podium-crown" viewBox="0 0 48 20" role="img" aria-label="Couronne du champion" shapeRendering="crispEdges">
+                      <path d="M3 14V6H6V9H9V11H12V12H14V5H17V8H19V9H22V5H24V2H26V5H29V9H31V8H34V5H36V12H39V11H42V9H45V6H48V14H45V18H6V14Z" fill="#F5B91B" />
+                      <path d="M3 14H48V18H3Z" fill="#C78313" />
+                      <path d="M7 14H41V16H7Z" fill="#FFE58A" />
+                      <path d="M10 12H12V14H10ZM23 7H25V9H23ZM36 12H38V14H36Z" fill="#E85D5D" />
+                    </svg>
+                  )}
                   <img src={minecraftHeadUrl(minecraftHeadIdentifier(finalWinner?.id, finalWinner?.name), 64)} className="player-head" alt="" />
                 </div>
                 <div className="podium-name">{finalWinner?.name ?? 'TBD'}</div>
@@ -302,15 +333,24 @@ function MrmS11() {
                           &nbsp;
                           {player.name}
                         </td>
-                        {Array.from({ length: LCQ_SEED_COUNT }, (_, seed) => (
-                          <td
-                            key={seed}
-                            className={player.droppedSeed === seed ? 'is-dropped' : undefined}
-                            title={player.droppedSeed === seed ? 'Pire seed ignorée' : undefined}
-                          >
-                            {formatLcqDelta(player[`s${seed + 1}`])}
-                          </td>
-                        ))}
+                        {Array.from({ length: LCQ_SEED_COUNT }, (_, seed) => {
+                          const seedRank = lcqSeedRankings[seed].get(i)
+                          const delta = formatLcqDelta(player[`s${seed + 1}`])
+                          const placeClass = seedRank <= 3 ? `lcq-place-${seedRank}` : ''
+                          const isDropped = player.droppedSeed === seed
+
+                          return (
+                            <td
+                              key={seed}
+                              className={placeClass || undefined}
+                              title={isDropped ? 'Pire seed ignorée' : undefined}
+                            >
+                              <span className={isDropped ? 'is-dropped' : undefined}>
+                                {seedRank === 1 && delta === '+0:00' ? '+0' : delta}
+                              </span>
+                            </td>
+                          )
+                        })}
                         <td className="col-pts">{formatLcqDelta(player.total)}</td>
                       </tr>
                     ))}

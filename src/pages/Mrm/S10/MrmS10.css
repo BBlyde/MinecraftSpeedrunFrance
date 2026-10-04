@@ -118,6 +118,10 @@
     white-space: nowrap;
 }
 
+.player-name-winner {
+    font-weight: 700;
+}
+
 .match .player-head,
 .match .mrm-bracket-head {
     width: calc(64px / (64 / 48) / 2);
@@ -202,7 +206,11 @@
 }
 
 .player-score-winner {
-    color: #86CE34;
+    color: #fff;
+}
+
+.player-loser {
+    opacity: 0.75;
 }
 
 .player:last-child {
@@ -340,10 +348,31 @@
     margin-bottom: 0.5rem;
 }
 
+.podium-head-winner {
+    position: relative;
+}
+
+.podium-crown {
+    position: absolute;
+    top: -1.15rem;
+    left: 50%;
+    display: block;
+    width: 2.8rem;
+    height: 1.2rem;
+    transform: translateX(-50%);
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.55));
+}
+
 .podium-head .player-head {
     width: calc(64px / (64 / 48));
     height: calc(64px / (64 / 48));
     border-radius: 4px;
+}
+
+.podium-head-winner .player-head {
+    box-sizing: border-box;
+    border: 1px solid #FFD700;
+    box-shadow: 0 0 8px rgba(255, 215, 0, 0.28);
 }
 
 .podium-player {
@@ -420,6 +449,7 @@
 }
 
 .group-table {
+    --qualified-row-background: #1f2923;
     flex: 1;
     min-width: 300px;
     max-width: 560px;
@@ -468,7 +498,8 @@
 
 .group-table table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
 }
 
 .group-table thead tr {
@@ -495,13 +526,13 @@
     transition: background-color 0.15s ease;
 }
 
-.group-table tbody tr:hover,
-.group-table tbody tr.row-qualify:hover {
+.group-table-1 tbody tr:hover,
+.group-table-2 tbody tr:hover {
     background: rgba(75, 75, 75, 0.2);
 }
 
-.group-table tbody tr:hover td,
-.group-table tbody tr.row-qualify:hover td {
+.group-table-1 tbody tr:hover td,
+.group-table-2 tbody tr:hover td {
     background: rgba(75, 75, 75, 0.2);
 }
 
@@ -549,19 +580,26 @@
 }
 
 .group-table td.col-rank {
-    color: #555;
+    color: #86CE34;
     font-size: 0.75rem;
     font-weight: 700;
     width: 28px;
 }
 
-.group-table td.col-pts {
-    font-weight: 700;
+.group-table td.col-player {
+    min-width: 150px;
     color: #fff;
+    font-weight: 600;
+    white-space: nowrap;
 }
 
-.row-qualify {
-    background: #ffffff18;
+.group-table td.col-pts {
+    font-weight: 700;
+    color: #86CE34;
+}
+
+.group-table tbody tr.row-qualify {
+    background: var(--qualified-row-background);
 }
 
 .row-qualify td {
@@ -570,6 +608,7 @@
 
 .row-qualify td.col-rank {
     color: #86CE34;
+    box-shadow: inset 3px 0 #86CE34;
 }
 
 .row-qualify td.col-pts {

@@ -1815,7 +1815,13 @@ function MrmPredictionS10({ season = 10 }) {
                   </div>
                 </div>
                 <div className="podium-player podium-first">
-                  <div className="podium-head">
+                  <div className="podium-head podium-head-winner">
+                    <svg className="podium-crown" viewBox="0 0 48 20" role="img" aria-label="Couronne du champion" shapeRendering="crispEdges">
+                      <path d="M2 15V7H5V10H8V12H11V13H14V6H17V9H20V10H22V6H23V4H25V6H26V10H28V9H31V6H34V13H37V12H40V10H43V7H46V15H43V18H5V15Z" fill="#F5B91B" />
+                      <path d="M2 15H46V18H2Z" fill="#C78313" />
+                      <path d="M6 15H42V16H6Z" fill="#FFE58A" />
+                      <path d="M10 12H13V14H10ZM22 7H26V9H22ZM35 12H38V14H35Z" fill="#E85D5D" />
+                    </svg>
                     <img src={firstPlayer ? mcHeadUrl(firstPlayer.uuid) : DEFAULT_HEAD} className="player-head" alt="" />
                   </div>
                   <div className="podium-name">{firstPlayer?.name ?? 'TBD'}</div>
