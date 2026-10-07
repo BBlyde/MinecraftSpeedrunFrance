@@ -73,7 +73,7 @@ function Header() {
       break
     case '/mrm':
       headerClass = 'header header-mrm'
-      leaderboardClass = 'leaderboard-ranked'
+      leaderboardClass = 'leaderboard-mrm'
       leaderboardLabel = 'TOURNOI'
       break
     case '/tournament':

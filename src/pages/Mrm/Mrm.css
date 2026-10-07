@@ -17,7 +17,7 @@
 .mrm-season-arrow {
     background: none;
     border: none;
-    color: #86CE34;
+    color: #7C509B;
     font-size: 1.4rem;
     padding: 0.5rem 0.9rem;
     cursor: pointer;
@@ -26,7 +26,7 @@
 }
 
 .mrm-season-arrow:hover {
-    color: #a8e05a;
+    color: #7C509B;
 }
 
 .mrm-season-arrow:disabled {
@@ -35,7 +35,7 @@
 }
 
 .mrm-season-arrow:disabled:hover {
-    color: #86CE34;
+    color: #7C509B;
 }
 
 .mrm-title {
@@ -43,7 +43,7 @@
     font-size: 2.5rem;
     font-weight: 700;
     line-height: 1.2;
-    background: linear-gradient(90deg, #86CE34 0%, rgba(40, 100, 20, 1) 35%, #102C30 50%, rgba(40, 100, 20, 1) 65%, #86CE34 100%);
+    background: linear-gradient(90deg, #7C509B 0%, #461F64 50%, #7C509B 100%);
     background-size: 200% auto;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -55,7 +55,7 @@
     font-size: 2.5rem;
     font-weight: 700;
     line-height: 1.2;
-    color: #88dd27;
+    color: #7C509B;
     font-style: italic;
 }
 

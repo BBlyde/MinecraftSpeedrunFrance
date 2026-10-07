@@ -25,8 +25,8 @@
 }
 
 .header.header-mrm {
-  border-bottom: 2px solid #86CE34;
-  --nav-accent: #86CE34;
+  border-bottom: 2px solid #7C509B;
+  --nav-accent: #7C509B;
 }
 
 .header.header-tournament {
@@ -94,6 +94,11 @@
 
 .header-logo #leaderboard.leaderboard-ranked {
     color: #86CE34;
+    font-style: italic;
+}
+
+.header-logo #leaderboard.leaderboard-mrm {
+    color: #7C509B;
     font-style: italic;
 }
 

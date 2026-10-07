@@ -55,10 +55,10 @@
     font-family: 'Poppins', sans-serif;
     font-size: 0.7rem;
     font-weight: 700;
-    background: rgba(13, 84, 43, 0.12);
-    border: 1px solid rgba(134, 206, 52, 0.25);
+    background: rgba(70, 31, 100, 0.12);
+    border: 1px solid rgba(124, 80, 155, 0.25);
     border-radius: 12px;
-    box-shadow: 0 0 18px rgba(134, 206, 52, 0.08);
+    box-shadow: 0 0 18px rgba(124, 80, 155, 0.08);
     backdrop-filter: blur(4px);
     letter-spacing: 1px;
     text-transform: uppercase;
@@ -95,7 +95,7 @@
     text-align: center;
     color: #fff8e8;
     background: #1c2128;
-    border: 2px solid #86CE34;
+    border: 2px solid #7C509B;
     border-radius: 0;
     box-shadow: 0 18px 50px rgba(0, 0, 0, 0.5);
     font-family: 'Poppins', sans-serif;
@@ -118,8 +118,8 @@
 .mrm-prediction-info-modal-close {
     align-self: center;
     border: none;
-    background: #86CE34;
-    color: #102C30;
+    background: #7C509B;
+    color: #461F64;
     font-family: inherit;
     font-size: 0.9rem;
     font-weight: 700;
@@ -131,7 +131,7 @@
 
 .mrm-prediction-info-modal-close:hover,
 .mrm-prediction-info-modal-close:focus-visible {
-    background: #a8e05a;
+    background: #7C509B;
     outline: none;
 }
 
@@ -167,7 +167,7 @@
 }
 
 .mrm-prediction-view-back-link {
-    color: #86CE34;
+    color: #7C509B;
     text-decoration: none;
     font-weight: 700;
 }
@@ -284,7 +284,7 @@
 }
 
 .mrm-prediction-scoring-header {
-    background: linear-gradient(90deg, #86CE34 0%, #102C30 75%);
+    background: linear-gradient(90deg, #7C509B 0%, #461F64 75%);
     color: #fff;
     font-size: 0.7rem;
     font-weight: 800;
@@ -302,7 +302,7 @@
 .mrm-prediction-scoring-section {
     margin: 0.15rem 0 0.25rem;
     font-weight: 700;
-    color: #c8e9a0;
+    color: #7C509B;
 }
 
 .mrm-prediction-scoring-list {
@@ -408,9 +408,9 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        border: 1px solid rgba(134, 206, 52, 0.42);
-        background: rgba(16, 44, 48, 0.95);
-        color: #dff5c1;
+        border: 1px solid rgba(124, 80, 155, 0.42);
+        background: rgba(70, 31, 100, 0.95);
+        color: #7C509B;
         border-radius: 999px;
         padding: 0.45rem 0.8rem;
         font-size: 0.8rem;
@@ -420,7 +420,7 @@
     }
 
     .mrm-prediction-scoring-toggle:focus-visible {
-        outline: 2px solid #86CE34;
+        outline: 2px solid #7C509B;
         outline-offset: 2px;
     }
 
@@ -470,9 +470,9 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        border: 1px solid rgba(134, 206, 52, 0.42);
-        background: rgba(16, 44, 48, 0.95);
-        color: #dff5c1;
+        border: 1px solid rgba(124, 80, 155, 0.42);
+        background: rgba(70, 31, 100, 0.95);
+        color: #7C509B;
         border-radius: 999px;
         padding: 0.45rem 0.8rem;
         font-size: 0.8rem;
@@ -482,7 +482,7 @@
     }
 
     .mrm-prediction-leaderboard-toggle:focus-visible {
-        outline: 2px solid #86CE34;
+        outline: 2px solid #7C509B;
         outline-offset: 2px;
     }
 
@@ -514,7 +514,7 @@
 
 .mrm-prediction-leaderboard-header {
     flex-shrink: 0;
-    background: linear-gradient(90deg, #86CE34 0%, #102C30 75%);
+    background: linear-gradient(90deg, #7C509B 0%, #461F64 75%);
     color: #fff;
     font-size: 0.7rem;
     font-weight: 800;
@@ -567,8 +567,8 @@
 }
 
 .mrm-prediction-leaderboard-row--active {
-    background: rgba(134, 206, 52, 0.14);
-    box-shadow: inset 2px 0 0 #86CE34;
+    background: rgba(124, 80, 155, 0.14);
+    box-shadow: inset 2px 0 0 #7C509B;
 }
 
 .mrm-prediction-leaderboard-row:last-child {
@@ -576,13 +576,13 @@
 }
 
 .mrm-prediction-leaderboard-row--me {
-    background: rgba(134, 206, 52, 0.1);
+    background: rgba(124, 80, 155, 0.1);
 }
 
 .mrm-prediction-leaderboard-rank {
     min-width: 1rem;
     font-weight: 700;
-    color: #86CE34;
+    color: #7C509B;
     font-variant-numeric: tabular-nums;
     text-align: left;
 }
@@ -610,7 +610,7 @@
 .mrm-prediction-leaderboard-row:hover .mrm-prediction-leaderboard-name {
     color: #fff;
     text-decoration: underline;
-    text-decoration-color: #86CE34;
+    text-decoration-color: #7C509B;
     text-underline-offset: 2px;
 }
 
@@ -857,7 +857,7 @@
 
 .mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.row-qualify td.col-rank,
 .mrm-container.mrm-prediction .mrm-s11 .group-table tbody tr.row-qualify td.col-player {
-    background-color: #1f2923;
+    background-color: var(--qualified-row-background);
     background-image: none;
 }
 
@@ -903,7 +903,7 @@
 }
 
 .mrm-container.mrm-prediction .mrm-s11 .group-table-lcq tbody tr.row-qualify:not(:hover):not(.mrm-group-row-result-correct):not(.mrm-group-row-result-off-one):not(.mrm-group-row-result-off-two):not(.mrm-group-row-result-wrong) td {
-    background: #1f2923;
+    background: var(--qualified-row-background);
     background-image: none;
 }
 
@@ -968,6 +968,12 @@
     background-image: none;
 }
 
+.mrm-container.mrm-prediction .mrm-s11 .group-table-lcq tbody tr.row-qualify:hover,
+.mrm-container.mrm-prediction .mrm-s11 .group-table-lcq tbody tr.row-qualify:hover td {
+    background-color: #322e40 !important;
+    background-image: none !important;
+}
+
 .mrm-sortable-row {
     cursor: grab;
     touch-action: none;
@@ -989,7 +995,7 @@
 
 .mrm-sortable-row--dragging {
     opacity: 0.85;
-    background: rgba(134, 206, 52, 0.08);
+    background: rgba(124, 80, 155, 0.08);
 }
 
 .mrm-match-pickable {
@@ -1028,7 +1034,7 @@
 .match .player.mrm-match-result-correct,
 .match button.player.mrm-match-result-correct,
 .match .mrm-bracket-scored-row.mrm-match-result-correct {
-    background: rgba(134, 206, 52, 0.22) !important;
+    background: rgba(124, 80, 155, 0.22) !important;
     color: #f2ffe8;
     opacity: 1;
 }

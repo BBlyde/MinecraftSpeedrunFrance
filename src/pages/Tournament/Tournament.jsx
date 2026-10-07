@@ -92,7 +92,7 @@ function Tournament() {
     <div className="d-flex flex-column align-items-center text-white tournament-container">
       <div className="tournament-header">
         <div className="tournament-title-row">
-          <span className="tournament-title">ARCHIVES TOURNOI</span>
+          <span className="tournament-title">ARCHIVES TOURNOIS</span>
         </div>
         <span className="tournament-subtitle">Résultats des tournois communautaires MSF</span>
       </div>
@@ -154,17 +154,6 @@ function Tournament() {
               </div>
             )
           })}
-          <a
-            className="sheet-source"
-            href={`https://docs.google.com/spreadsheets/d/${tournamentArchives[0].spreadsheetId}/edit`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <svg className="sheet-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-              <path fill="#0F9D58" d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z" />
-              <path fill="#fff" d="M7 7h4v2H7zm0 4h4v2H7zm0 4h4v2H7zm6-8h4v2h-4zm0 4h4v2h-4zm0 4h4v2h-4z" />
-            </svg>Basé sur la Google Sheet des archives de tournois
-          </a>
         </div>
       )}
     </div>

@@ -35,7 +35,7 @@
     font-size: 1.4rem;
     font-weight: 700;
     letter-spacing: 2px;
-    color: #86CE34;
+    color: #7C509B;
     margin-bottom: 2rem;
     text-align: center;
 }
@@ -193,8 +193,8 @@
 }
 
 .match-final {
-    border-color: #86CE34;
-    box-shadow: 0 0 14px rgba(134, 206, 52, 0.15);
+    border-color: #7C509B;
+    box-shadow: 0 0 14px rgba(124, 80, 155, 0.15);
 }
 
 .match-final.match-final--locked {
@@ -278,8 +278,8 @@
 }
 
 .round-label-highlight {
-    color: #86CE34;
-    text-shadow: 0 0 8px rgba(134, 206, 52, 0.6);
+    color: #7C509B;
+    text-shadow: 0 0 8px rgba(124, 80, 155, 0.6);
 }
 
 .match-third-place {
@@ -293,6 +293,45 @@
     flex-direction: column;
     align-items: center;
     padding-bottom: 3rem;
+}
+
+.podium-logo {
+    display: block;
+    width: min(500px, 90vw);
+    height: auto;
+    margin-left: 200px;
+}
+
+@media (min-width: 991px) and (max-width: 1599px) {
+    .container-first {
+        flex-direction: column;
+        align-items: center;
+        gap: 2.75rem;
+    }
+
+    .mrm-playoffs {
+        order: 1;
+        overflow-x: auto;
+        max-width: 100%;
+        width: 100%;
+        padding: 1rem 0 0;
+    }
+
+    .mrm-playoffs .main-bracket {
+        min-width: 900px;
+    }
+
+    .mrm-podium {
+        order: 2;
+        width: 100%;
+        padding: 0;
+    }
+
+    .podium-logo,
+    .podium-title,
+    .podium-wrapper {
+        margin-left: 0;
+    }
 }
 
 @media (min-width: 991px) {
@@ -316,7 +355,7 @@
     font-size: 1.4rem;
     font-weight: 700;
     letter-spacing: 2px;
-    color: #86CE34;
+    color: #7C509B;
     margin-bottom: 2rem;
     text-align: center;
     margin-left: 200px;
@@ -327,6 +366,13 @@
     align-items: flex-end;
     gap: 0.5rem;
     margin-left: 200px;
+}
+
+@media (min-width: 991px) and (max-width: 1599px) {
+    .podium-title,
+    .podium-wrapper {
+        margin-left: 0;
+    }
 }
 
 .podium-head {
@@ -430,13 +476,17 @@
 }
 
 .group-table {
-    --qualified-row-background: #1f2923;
+    --qualified-row-background: #461F64;
     width: 100%;
     max-width: 900px;
     background: #161b22;
     border: 1px solid #2e2e2e;
     border-radius: 8px;
     overflow: hidden;
+}
+
+.group-table-lcq {
+    --qualified-row-background: #2C273D;
 }
 
 .group-table-scroll {
@@ -448,7 +498,7 @@
 
 .group-title {
     padding: 0.6rem 1rem;
-    background: linear-gradient(90deg, #86CE34 0%, #102C30 75%) #102C30;
+    background: linear-gradient(90deg, #7C509B 0%, #461F64 75%) #461F64;
     font-size: 0.75rem;
     font-weight: 800;
     letter-spacing: 2px;
@@ -503,7 +553,7 @@
 }
 
 .group-table td.col-rank {
-    color: #86CE34;
+    color: #7C509B;
     font-size: 0.75rem;
     font-weight: 700;
     width: 28px;
@@ -547,7 +597,7 @@
 }
 
 .group-table tbody tr.row-qualify td.col-rank {
-    box-shadow: inset 3px 0 #86CE34;
+    box-shadow: inset 3px 0 #7C509B;
 }
 
 .group-table tbody tr:hover td,
@@ -572,7 +622,7 @@
 }
 
 .group-table td.col-pts {
-    color: #86CE34;
+    color: #7C509B;
     font-weight: 700;
 }
 
@@ -605,7 +655,7 @@
 
 .group-table tbody tr.row-qualify td.col-rank,
 .group-table tbody tr.row-qualify td.col-pts {
-    color: #86CE34;
+    color: #7C509B;
 }
 .rules-panel {
     border: 1px solid #2a2a2a;
@@ -617,7 +667,7 @@
 }
 
 .rules-panel-header {
-    background: linear-gradient(90deg, #86CE34 0%, #102C30 75%);
+    background: linear-gradient(90deg, #7C509B 0%, #461F64 75%);
     color: #fff;
     font-size: 0.75rem;
     font-weight: 800;
@@ -646,18 +696,18 @@
 
 .rules-icon {
     font-size: 1.25rem;
-    color: #86CE34;
+    color: #7C509B;
     flex-shrink: 0;
 }
 
 .rules-link {
-    color: #86CE34;
+    color: #7C509B;
     text-decoration: underline;
     text-underline-offset: 3px;
 }
 
 .rules-highlight {
-    color: #86CE34;
+    color: #7C509B;
     text-underline-offset: 3px;
 }
 
@@ -707,6 +757,12 @@
         margin-bottom: 1.2rem;
     }
 
+    .podium-logo {
+        display: block;
+        max-width: 100%;
+        margin: 0 auto 2rem;
+    }
+
     .podium-wrapper {
         margin-left: 0;
     }
@@ -751,6 +807,12 @@
 
     .mrm-playoffs .main-bracket {
         align-items: stretch;
+    }
+}
+
+@media (max-width: 1599px) {
+    .podium-logo {
+        display: none;
     }
 }
 
@@ -855,7 +917,7 @@
 }
 
 .match button.player:focus-visible {
-    outline: 2px solid #86CE34;
+    outline: 2px solid #7C509B;
     outline-offset: -2px;
     z-index: 1;
 }
@@ -892,5 +954,9 @@
 .group-table tbody tr.mrm-group-row-result-wrong,
 .group-table tbody tr.row-qualify.mrm-group-row-result-wrong {
     background: rgba(173, 54, 54, 0.28);
+}
+
+.group-table-lcq tbody tr.row-qualify td {
+    background-color: var(--qualified-row-background);
 }
 }

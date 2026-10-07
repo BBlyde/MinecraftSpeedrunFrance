@@ -115,6 +115,7 @@ function MrmS10() {
           </div>
 
           <div className="mrm-podium">
+            <img className="podium-logo" src="/mrm.png" alt="Logo MRM" />
             <h2 className="podium-title">PODIUM</h2>
             <div className="podium-wrapper">
               <div className="podium-player podium-second">
@@ -129,7 +130,7 @@ function MrmS10() {
               <div className="podium-player podium-first">
                 <div className="podium-head podium-head-winner">
                   {finalWinner && (
-                    <svg className="podium-crown" viewBox="0 0 48 20" role="img" aria-label="Couronne du champion" shapeRendering="crispEdges">
+                    <svg className="podium-crown" viewBox="1.5 0 48 20" role="img" aria-label="Couronne du champion" shapeRendering="crispEdges">
                       <path d="M3 14V6H6V9H9V11H12V12H14V5H17V8H19V9H22V5H24V2H26V5H29V9H31V8H34V5H36V12H39V11H42V9H45V6H48V14H45V18H6V14Z" fill="#F5B91B" />
                       <path d="M3 14H48V18H3Z" fill="#C78313" />
                       <path d="M7 14H41V16H7Z" fill="#FFE58A" />
