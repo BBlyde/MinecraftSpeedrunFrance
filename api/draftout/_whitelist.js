@@ -74,4 +74,5 @@ export const DRAFTOUT_WHITELIST = [
   '79b92d42-e19c-467a-98e9-920597308bac', // Azelysct
   'e93e1e82-5d22-4a51-b8d5-0cbb5a8ab7f5', // Inflerno
   'b83e7641-c455-4160-9ae7-f8303e7ec7db', // ItsIno_
+  'bffb1b32-55e3-4c03-a006-e602f06cffb3', // OhMatronux 
 ]
