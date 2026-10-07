@@ -115,7 +115,6 @@ function MrmS10() {
           </div>
 
           <div className="mrm-podium">
-            <img className="podium-logo" src="/mrm.png" alt="Logo MRM" />
             <h2 className="podium-title">PODIUM</h2>
             <div className="podium-wrapper">
               <div className="podium-player podium-second">

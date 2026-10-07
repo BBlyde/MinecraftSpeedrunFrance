@@ -295,13 +295,6 @@
     padding-bottom: 3rem;
 }
 
-.podium-logo {
-    display: block;
-    width: min(500px, 90vw);
-    height: auto;
-    margin-left: 200px;
-}
-
 @media (min-width: 991px) and (max-width: 1599px) {
     .container-first {
         flex-direction: column;
@@ -327,7 +320,6 @@
         padding: 0;
     }
 
-    .podium-logo,
     .podium-title,
     .podium-wrapper {
         margin-left: 0;
@@ -707,7 +699,7 @@
 }
 
 .rules-highlight {
-    color: #7C509B;
+    color: #B180D1;
     text-underline-offset: 3px;
 }
 
@@ -757,12 +749,6 @@
         margin-bottom: 1.2rem;
     }
 
-    .podium-logo {
-        display: block;
-        max-width: 100%;
-        margin: 0 auto 2rem;
-    }
-
     .podium-wrapper {
         margin-left: 0;
     }
@@ -807,12 +793,6 @@
 
     .mrm-playoffs .main-bracket {
         align-items: stretch;
-    }
-}
-
-@media (max-width: 1599px) {
-    .podium-logo {
-        display: none;
     }
 }
 
