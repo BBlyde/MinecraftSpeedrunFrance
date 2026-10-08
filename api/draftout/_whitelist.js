@@ -77,4 +77,5 @@ export const DRAFTOUT_WHITELIST = [
   'bffb1b32-55e3-4c03-a006-e602f06cffb3', // OhMatronux 
   '9de95356-df09-4aec-90c4-35c042c9180c', // Sephorade
   '7f73c177-97e0-402e-9326-527d685e826b', // Bomby_
+  '42513184-afb9-4842-a7d0-33f662693aae', // Pichu__
 ]
