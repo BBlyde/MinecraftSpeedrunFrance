@@ -75,4 +75,5 @@ export const DRAFTOUT_WHITELIST = [
   'e93e1e82-5d22-4a51-b8d5-0cbb5a8ab7f5', // Inflerno
   'b83e7641-c455-4160-9ae7-f8303e7ec7db', // ItsIno_
   'bffb1b32-55e3-4c03-a006-e602f06cffb3', // OhMatronux 
+  '9de95356-df09-4aec-90c4-35c042c9180c', // Sephorade
 ]
