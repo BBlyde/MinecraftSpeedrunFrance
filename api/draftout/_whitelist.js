@@ -159,4 +159,5 @@ export const DRAFTOUT_WHITELIST = [
   '0b1d9786-aadb-4bc3-a36c-33f417e5161f', // Youtubefan4
   '873a2ffa-3333-4d6a-970d-3d231dcca2a9', // Zankarei
   'b9c1e1b6-86b7-4c50-be91-9bf8a3ca4f42', // zeroxie_
+  'e6187238-805e-401a-9571-35dec85d0c76', // Shadow_Snniper
 ]
