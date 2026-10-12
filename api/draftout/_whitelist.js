@@ -160,4 +160,16 @@ export const DRAFTOUT_WHITELIST = [
   '873a2ffa-3333-4d6a-970d-3d231dcca2a9', // Zankarei
   'b9c1e1b6-86b7-4c50-be91-9bf8a3ca4f42', // zeroxie_
   'e6187238-805e-401a-9571-35dec85d0c76', // Shadow_Snniper
+  '2b7b8ba4-3ac6-437f-847a-77a97696cc4b', // JonathanDGR
+  '107fe80b-f637-4a85-89f9-9fa1c3c68005', // D4rthMc
+  'd063359a-21a6-46e2-811a-29015fdc9f54', // Comptable
+  'bfecce94-d8df-49ff-ae31-b7c1edd2307c', // rikos_
+  '5d396cef-8b55-4adf-80d3-bbc23d87842f', // SayZzy
+  'dd8d3f7e-583b-412e-87d6-5be927a9f6f1', // Natthanael23
+  '76f54b43-e7c0-4281-97b5-79824be06715', // xChocoww
+  '33a3589a-c56f-4a2a-be7a-44c6094c0f80', // Aberos
+  '1c0c6ab5-63f7-4993-84eb-c4e0d87203f0', // Batilm
+  '6a342b57-ccb1-4d7f-8077-bc8a20c7c172', // Ryzox79
+  '0cffbc48-9255-4e95-9ba3-2bce0608d37e', // Foskill50
+  '3463da78-4fe2-434d-9943-19dc247c09c7', // mecbanan_
 ]
