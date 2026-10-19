@@ -173,4 +173,5 @@ export const DRAFTOUT_WHITELIST = [
   '0cffbc48-9255-4e95-9ba3-2bce0608d37e', // Foskill50
   '3463da78-4fe2-434d-9943-19dc247c09c7', // mecbanan_
   '4ff0bfa0-5b96-46f6-a47f-a4fe30cb4486', // Robylns
+  '98b6429d-37c1-40cc-9408-1e8816854f01', // elgust05
 ]
