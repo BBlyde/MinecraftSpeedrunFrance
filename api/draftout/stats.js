@@ -1,63 +1,5 @@
 import { DRAFTOUT_WHITELIST } from './_whitelist.js'
 
-const DRAFTOUT_CONCURRENCY = 80
-const DRAFTOUT_TIMEOUT_MS = 5000
-const RATE_LIMIT_RETRIES = 2
-
-function wait(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms))
-}
-
-async function fetchDraftoutStats(key, era) {
-  const url = `https://draftoutmc.com/api/stats/${key}?era=${era}`
-
-  for (let attempt = 0; attempt <= RATE_LIMIT_RETRIES; attempt++) {
-    const response = await fetch(url, {
-      signal: AbortSignal.timeout(DRAFTOUT_TIMEOUT_MS),
-    })
-
-    if (response.status === 429 || response.status === 503) {
-      await response.body?.cancel?.()
-      if (attempt === RATE_LIMIT_RETRIES) return null
-      const retryAfter = Number(response.headers.get('retry-after'))
-      const waitMs = Number.isFinite(retryAfter) && retryAfter > 0
-        ? Math.min(retryAfter * 1000, 1000)
-        : 200 * (attempt + 1)
-      await wait(waitMs)
-      continue
-    }
-
-    if (!response.ok) {
-      await response.body?.cancel?.()
-      return null
-    }
-
-    return response.json()
-  }
-
-  return null
-}
-
-async function mapPool(items, limit, fn) {
-  const results = new Array(items.length)
-  let cursor = 0
-
-  async function worker() {
-    while (cursor < items.length) {
-      const index = cursor++
-      try {
-        results[index] = { status: 'fulfilled', value: await fn(items[index]) }
-      } catch (reason) {
-        results[index] = { status: 'rejected', reason }
-      }
-    }
-  }
-
-  const workers = Math.min(limit, items.length)
-  await Promise.all(Array.from({ length: workers }, () => worker()))
-  return results
-}
-
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
     res.status(405).end('Method Not Allowed')
@@ -86,9 +28,19 @@ export default async function handler(req, res) {
       ...whitelistExtra.map(uuid => ({ key: uuid })),
     ]
 
-    const results = await mapPool(allQueries, DRAFTOUT_CONCURRENCY, ({ key }) =>
-      fetchDraftoutStats(key, era)
-    )
+    const CONCURRENCY = 25
+    const results = []
+    for (let i = 0; i < allQueries.length; i += CONCURRENCY) {
+      const batch = allQueries.slice(i, i + CONCURRENCY)
+      const batchResults = await Promise.allSettled(
+        batch.map(({ key }) =>
+          fetch(`https://draftoutmc.com/api/stats/${key}?era=${era}`, {
+            signal: AbortSignal.timeout(5000),
+          }).then(r => r.ok ? r.json() : null)
+        )
+      )
+      results.push(...batchResults)
+    }
 
     // Ajout liste drafout ssi compte draftout (player non null) et au moins une partie jouée (matches != 0)
     const players = []
