@@ -39,7 +39,6 @@ const LeaderboardRanked = () => {
   const season = parseInt(searchParams.get('season') || CURRENT_SEASON, 10)
 
   const BACKEND_API_URL = 'https://back.mcsr-game.com/leaderboard'
-  const MCSR_API_URL = 'https://api.mcsrranked.com/leaderboard'
 
   /**
    * Retrieve leaderboard data from the backend API and MCSR API, and update the state with the fetched data.
@@ -53,7 +52,7 @@ const LeaderboardRanked = () => {
       // Api calls
       const [response, mcsrResponse] = await Promise.all([
         axios.get(`${BACKEND_API_URL}?season=${season}`),
-        axios.get(`${MCSR_API_URL}?season=${season}`)
+        axios.get(`${BACKEND_API_URL}/season?season=${season}`)
       ])
 
       // Map the response data to include lcqQualified property
@@ -68,7 +67,7 @@ const LeaderboardRanked = () => {
         const topLcqPlayers = nextPlayers.filter((player) => Number(player.placement) <= TOP_LCQ_PLAYERS_COUNT)
         const lcqChecks = await Promise.allSettled(
           topLcqPlayers.map(async (player) => {
-            const res = await axios.get(`https://mcsrranked.com/api/users/${player.username}?season=${season}`)
+            const res = await axios.get(`${BACKEND_API_URL}/users/${encodeURIComponent(player.username)}?season=${season}`)
             const peakElo = res.data?.data?.seasonResult?.highest
             return getLcqQualified(peakElo, player)
           })
@@ -126,7 +125,7 @@ const LeaderboardRanked = () => {
     setHoveredPlayer({ ...player, stats: null })
     setTooltipPos({ x: e.clientX, y: e.clientY })
     try {
-      const res = await axios.get(`https://mcsrranked.com/api/users/${player.username}?season=${season}`)
+      const res = await axios.get(`${BACKEND_API_URL}/users/${encodeURIComponent(player.username)}?season=${season}`)
       const stats = { ...res.data.data.statistics.season, eloRank: res.data.data.eloRank }
       setHoveredPlayer(prev =>
         prev?.uuid === player.uuid ? { ...prev, stats } : prev
