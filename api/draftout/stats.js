@@ -3,12 +3,13 @@ import { DRAFTOUT_WHITELIST } from './_whitelist.js'
 const BARE_UUID = /^[0-9a-f]{32}$/i
 const DASHED_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
-// Les joueurs à partir de ce seuil sont toujours relus en direct.
-const LIVE_ELO_MIN = 1000
-const LOW_ELO_CACHE_TTL_MS = 5 * 60 * 1000
+// Au-dessus de 1000 : 5 secondes. 1000 ou moins, élo absent, ou compte Draftout absent : 5 minutes.
+const HIGH_ELO_MIN = 1000
+const HIGH_ELO_CACHE_TTL_MS = 5 * 1000
+const OTHER_ELO_CACHE_TTL_MS = 5 * 60 * 1000
 
-// Cache mémoire par instance : elo == null ou elo < 1000, y compris l'absence de compte.
-const lowEloCache = new Map()
+// Cache mémoire par instance.
+const statsCache = new Map()
 
 // Draftout répond 404 sans tirets. MCSR Ranked renvoie l'UUID sans tirets.
 function dashedUuid(uuid) {
@@ -18,20 +19,21 @@ function dashedUuid(uuid) {
   return value.replace(/^(.{8})(.{4})(.{4})(.{4})(.{12})$/, '$1-$2-$3-$4-$5')
 }
 
-function isCacheableElo(elo) {
-  return elo == null || elo < LIVE_ELO_MIN
+function cacheTtlMs(elo) {
+  if (elo != null && elo > HIGH_ELO_MIN) return HIGH_ELO_CACHE_TTL_MS
+  return OTHER_ELO_CACHE_TTL_MS
 }
 
 function statsCacheId(era, key) {
   return `${era}:${key}`
 }
 
-function readLowEloCache(era, key) {
+function readStatsCache(era, key) {
   const id = statsCacheId(era, key)
-  const entry = lowEloCache.get(id)
+  const entry = statsCache.get(id)
   if (!entry) return null
   if (entry.expiresAt <= Date.now()) {
-    lowEloCache.delete(id)
+    statsCache.delete(id)
     return null
   }
   return entry
@@ -63,15 +65,11 @@ function toLeaderboardPlayer(stats) {
   }
 }
 
-function rememberLowElo(era, key, stats) {
-  const id = statsCacheId(era, key)
-  const elo = stats?.player?.elo
-  if (!stats || !isCacheableElo(elo)) {
-    lowEloCache.delete(id)
-    return
-  }
-  lowEloCache.set(id, {
-    expiresAt: Date.now() + LOW_ELO_CACHE_TTL_MS,
+function rememberStats(era, key, stats) {
+  if (!stats) return
+  const elo = stats.player?.elo
+  statsCache.set(statsCacheId(era, key), {
+    expiresAt: Date.now() + cacheTtlMs(elo),
     player: toLeaderboardPlayer(stats),
   })
 }
@@ -117,7 +115,7 @@ export default async function handler(req, res) {
     const toFetch = []
 
     for (const key of allQueries) {
-      const cached = readLowEloCache(era, key)
+      const cached = readStatsCache(era, key)
       if (cached) {
         if (cached.player) players.push({ ...cached.player })
       } else {
@@ -131,7 +129,7 @@ export default async function handler(req, res) {
       const batchResults = await Promise.allSettled(
         batch.map(async (key) => {
           const stats = await fetchDraftoutStats(key, era)
-          if (stats) rememberLowElo(era, key, stats)
+          if (stats) rememberStats(era, key, stats)
           return toLeaderboardPlayer(stats)
         })
       )
